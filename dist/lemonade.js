@@ -1220,13 +1220,13 @@
                                 L.render(handler, root, this);
                             });
                         }
-                    } else {
-                        requestAnimationFrame(() => {
-                            if (typeof (this.onreconnect) === 'function') {
-                                this.onreconnect();
-                            }
-                        });
                     }
+
+                    requestAnimationFrame(() => {
+                        if (typeof(this.onconnect) === 'function') {
+                            this.onconnect(false);
+                        }
+                    });
                 }
             }
 
