@@ -15,6 +15,8 @@ declare namespace lemonade {
         shadowRoot?: boolean,
         /** Apply-only will apply the LemonadeJS self component on the existing HTML inside the tag already in the DOM */
         applyOnly?: boolean,
+        /** Web component prefix name. Default: 'lm' */
+        prefix?: string,
     }
 
     interface ComponentEvents {

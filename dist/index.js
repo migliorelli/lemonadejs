@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v4.2.1 (ESM build)
+ * LemonadeJS v4.3.0 (ESM build)
  *
  * Website: https://lemonadejs.net
  * Description: Create amazing web based reusable components.
@@ -1178,12 +1178,20 @@ function Lemonade() {
 
     L.path = extractFromPath;
 
+    /**
+     * Create a Web Component
+     * @param {string} name - web component name
+     */
     L.createWebComponent = function(name, handler, options) {
         if (typeof(handler) !== 'function') {
             return 'Handler should be an function';
         }
 
-        const componentName = 'lm-' + name;
+        // Prefix
+        let prefix = options && options.prefix ? options.prefix : 'lm';
+
+        // Component name
+        const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
         if (customElements.get(componentName)) {
@@ -1195,14 +1203,22 @@ function Lemonade() {
                 }
 
                 connectedCallback() {
+                    // LemonadeJS self
+                    let self = this;
+                    // First call
+                    let state = typeof(this.el) === 'undefined';
                     // LemonadeJS is already rendered
-                    if (typeof(this.el) === 'undefined') {
+                    if (state === true) {
+                        // Get attributes
+                        let props = getAttributes.call(self, true);
+                        // Copy all values to the object
+                        L.setProperties.call(self, props, true);
                         // Render
                         if (options && options.applyOnly === true) {
                             // Merge component
                             handler.call(this);
                             // Apply
-                            L.apply(this, this);
+                            L.apply(this, self);
                         } else {
                             let root = this;
                             if (options && options.shadowRoot === true) {
@@ -1212,16 +1228,22 @@ function Lemonade() {
                             }
                             // Give the browser time to calculate all width and heights
                             requestAnimationFrame(() => {
-                                L.render(handler, root, this);
+                                L.render(handler, root, self);
                             });
                         }
                     }
 
                     requestAnimationFrame(() => {
-                        if (typeof(this.onconnect) === 'function') {
-                            this.onconnect(false);
+                        if (typeof(self.onconnect) === 'function') {
+                            self.onconnect(self, state);
                         }
                     });
+                }
+
+                disconnectedCallback() {
+                    if (typeof(this.ondisconnect) === 'function') {
+                        this.ondisconnect(this);
+                    }
                 }
             }
 
