@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v4.3.0 (ESM build)
+ * LemonadeJS v4.3.2 (ESM build)
  *
  * Website: https://lemonadejs.net
  * Description: Create amazing web based reusable components.
@@ -1181,6 +1181,8 @@ function Lemonade() {
     /**
      * Create a Web Component
      * @param {string} name - web component name
+     * @param {function} handler - lemonadejs component
+     * @param {object} options - options to create the web components
      */
     L.createWebComponent = function(name, handler, options) {
         if (typeof(handler) !== 'function') {
@@ -1227,9 +1229,7 @@ function Lemonade() {
                                 this.shadowRoot.appendChild(root);
                             }
                             // Give the browser time to calculate all width and heights
-                            requestAnimationFrame(() => {
-                                L.render(handler, root, self);
-                            });
+                            L.render(handler, root, self, '');
                         }
                     }
 

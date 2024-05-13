@@ -96,9 +96,9 @@ declare namespace lemonade {
      * Extract a property from a nested object using a string address
      * @param {string} name New webcomponent name. LemonadeJS includes a prefix of lm- so your final tag will be <lm-yourname>
      * @param {function} handler LemonadeJS component
-     * @param {object} options Options for your webcomponent
+     * @param {object?} options Options for your webcomponent
      */
-    function createWebComponent(name: string, handler: Function, options: WebComponentOptions) : any;
+    function createWebComponent(name: string, handler: Function, options?: WebComponentOptions) : any;
 
     /**
      * Get an artifact from LemonadeJS Sugar by its alias identification

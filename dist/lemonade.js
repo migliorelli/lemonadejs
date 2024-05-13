@@ -1234,9 +1234,7 @@
                                 this.shadowRoot.appendChild(root);
                             }
                             // Give the browser time to calculate all width and heights
-                            requestAnimationFrame(() => {
-                                L.render(handler, root, self);
-                            });
+                            L.render(handler, root, self, '');
                         }
                     }
 
