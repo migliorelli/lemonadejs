@@ -7,3 +7,6 @@ https://news.ycombinator.com/item?id=28196849
 - {{self.test*self.test}} - avoid duplication in the monitoring
 - Classes are not detect with https://codesandbox.io/s/lemonadejs-examples-sebfeo
 - treat style
+
+
+https://ui.dev/why-react-query

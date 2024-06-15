@@ -62,6 +62,14 @@ npm run start
 After executing these steps, open your web browser to the address provided by the development server. You're now ready to develop with LemonadeJS and see your changes in real-time. Enjoy crafting your reactive interfaces!
   
   
+## IDE
+
+### VSCode Extension
+
+You can install this extension to get your templates properly highlighted.
+
+[VSCode Code Highlight Extension](https://marketplace.visualstudio.com/items?itemName=nicolasjesse.lemonadejs-highlight)
+
 
 Official components
 -------------------
