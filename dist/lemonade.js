@@ -785,18 +785,20 @@
                     } else {
                         if (attr[k[i]] !== value) {
                             if (typeof(value) === 'function' || typeof(value) === 'object') {
-                                // Do not make sense to set an function or object to a HTML attribute
+                                // Do not make sense to set a function or object to a HTML attribute
                                 element[k[i]] = value;
                                 // Make sure the HTML is blank
-                                element.setAttribute(k[i], '');
+                                element.removeAttribute(k[i]);
                             } else {
-                                // Make sure the HTML is blank
+                                // Make sure the HTML matches the value
                                 element.setAttribute(k[i], value);
+                                // Parse attributes
+                                parseAttribute.call(self, element, k[i]);
                             }
+                        } else {
+                            // Parse attributes
+                            parseAttribute.call(self, element, k[i]);
                         }
-
-                        // Parse attributes
-                        parseAttribute.call(self, element, k[i]);
                     }
                 }
             }
@@ -879,11 +881,12 @@
             console.error('Invalid DOM')
             return false;
         }
-
+        // Sub-components
         if (! components) {
             components = {};
         }
-
+        // Dynamic template
+        let literalControl;
         // Flexible element (class or method)
         if (typeof(o) == 'function') {
             if (isClass(o)) {
