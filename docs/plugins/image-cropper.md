@@ -2,7 +2,7 @@ title: LemonadeJS Image Cropper
 keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react, plugins
 description: A linkedin like reactive javascript image uploader plugin using LemonadeJS.
 
-LemonadeJS Image Cropper
+JavaScript Image Cropper
 =============
 
 The JavaScript image cropper is a plugin to support a user-friendly photo upload and allows small online editions such as image crop or changes in brightness, contrast, rotate, zoom.  

@@ -2,7 +2,7 @@ title: LemonadeJS Components: Create Reusable Reactive UI Components,
 keywords: LemonadeJS, reusable components, reactive UI, frontend, javascript library, components, hooks,
 description: Learn how to create reusable and reactive UI components with LemonadeJS, enhancing your web applications with a modular approach.
 
-![Reactive components](img/components.svg){style="max-height: 220px"}
+![Reactive components](img/components.svg){.right style="max-height: 220px"}
 
 Components
 ==========

@@ -1,48 +1,60 @@
 title: LemonadeJS Router
 keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react, router, router controller, plugins
-description: Unveil how to leverage LemonadeJS Router for controlling which component is rendered based on routing.
+description: LemonadeJS Router is a JavaScript plugin to create rules on component rendering based on the defined routes.
 
-LemonadeJS Router
-======
+# JavaScript Router
+
 
 Pico Library This library has less than 2 KBytes  
-  
-The LemonadeJS router plugin is part of the official libraries and is distributed under the MIT. This controls which component is rendered and append to the page based on the route. This library is part of the PICO Library, which is a very smart and optimized library that does not require any external dependencies.  
-  
 
-Documentation
--------------
 
-  
+The LemonadeJS Router, an MIT-licensed JavaScript plugin within the lightweight Pico Library (under 2 KBytes), facilitates content rendering based on routes. It smartly intercepts link clicks to display components according to set-up, all without extra dependencies.
+
+
+## Documentation
 
 ### Installation
 
 ```bash
 npm install @lemonadejs/router
 ```
-  
+ 
 
 ### Attributes
 
-| Attribute | Description |
-|  --- | --- |
-| **Router component** |
-| animation?: Boolean | Enable the page change animation. |
-| **Route element** |
-| path: String | Route to execute this page. This should be a regular expression string. |
-| controller: Component | Component name. |
-| url?: String | URL to load a remote template. |
-| preload?: Boolean | URL to load a remote template. |
+#### Router settings
+
+| Attribute              | Description                       |
+|------------------------|-----------------------------------|
+| animation?: Boolean    | Enable the page change animation. |
+| single?: Boolean       | Single page on the DOM            |
+
+#### Page settings
+
+| Attribute             | Description                                                             |
+|-----------------------|-------------------------------------------------------------------------|
+| path: String          | Route to execute this page. This should be a regular expression string. |
+| controller: Component | Component name.                                                         |
+| url?: String          | URL to load a remote template.                                          |
+| preload?: Boolean     | URL to load a remote template.                                          |
+
 
 ### Events
 
-| Event | Description |
-| --- | --- |
-| **Router component** |     |
-| onchange?: function | Execute the page changes.  <br>`onchange(newPage: Object, oldPage: Object) => void;` |
-| **Route element** |     |
-| onenter?: function | When enters in the page  <br>`onenter(page: Object) => void;` |
+#### Router events
 
+| Event                         | Description                                                                                                |
+|-------------------------------|------------------------------------------------------------------------------------------------------------|
+| onchangepage?: function       | When the page changes.  <br>`onchangepage(newPage: Object, oldPage: Object, isNewPage: Boolean) => void;`  |
+| onbeforechangepage?: Function | Called before the page is changed.<br>`onbeforechangepage(path: String, page: Object) => object \| boolean` |
+| onbeforecreatepage?: Function | Before the page is created.<br>`onbeforecreatepage(page: Object, html: String) => boolean \| void`         |
+
+#### Page events
+
+| Event              | Description                                                                           |
+|--------------------|---------------------------------------------------------------------------------------|
+| onenter?: function | When enters in the page.<br>`onenter(newPage: Object, previousPage: Object) => void;` |
+| onleave?: Function | When leaves a page.<br>`onleave(currentPage: Object, newPage: Object) => void;`       |                                     
 
 
 Router SPA example
@@ -57,76 +69,69 @@ The router loads the page content from a remote HTML file in the following examp
     </div>
 </div>
 
-```xml
-<html>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto|Material+Icons" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@jsuites/css/dist/style.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@lemonadejs/navbar/dist/style.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@lemonadejs/toolbar/dist/style.css" type="text/css" />
+{.ignore-execution}
+```html
+<meta name='viewport' id="viewport" content='width=device-width,initial-scale=1,user-scalable=no' />
+<meta name='format-detection' content = "telephone=no" />
 
-<script src="https://cdn.jsdelivr.net/npm/lemonadejs/dist/lemonade.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@lemonadejs/router/dist/style.min.css" type="text/css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@lemonadejs/studio/dist/style.min.css" type="text/css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@lemonadejs/toolbar/dist/style.min.css" type="text/css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto|Material+Icons" type="text/css" />
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lemonadejs/dist/lemonade.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@lemonadejs/router/dist/index.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@lemonadejs/studio/dist/index.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@lemonadejs/toolbar/dist/index.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@lemonadejs/navbar/dist/index.min.js"></script>
 
 <div id='root'></div>
+
 <script>
-function List () {
-    // Create one self for each interaction in the array
-    const self = this;
-    // Template
-    return `<div class="form-group option" style="padding: 8px">
-        <div class="option-image">
-            <div class="option-badge solid"></div>
-            <img src="/templates/default/img/nouser.png" />
-        </div>
-        <div class="option-header">
-            <div class="option-name">{{self.name}}</div>
-            <div class="option-small">{{self.message}}</div>
-        </div>
-        <div class="option-date prettydate">1 mon ago</div>
+function Home() {
+    let self = this;
+
+    self.onenter = function() {
+        console.log('Enter home');
+    }
+
+    self.onleave = function() {
+        console.log('Leave home');
+    }
+
+    return `<div>
+        <h1>Home</h1>
+        <p>This is home...</p>
     </div>`;
 }
 
-function Home() {
-    const self = this;
+function Message () {
+    let self = this;
+    return `<div>
+        <h1>New message</h1>
+        <p>Second page...</p>
+    </div>`;
+}
 
-    self.onenter = function() {
-        console.log('Enter');
-    };
-
-    self.data = [
-        { name: 'Alexander Foster', message: 'Lorem Ipsum é...' },
-        { name: 'Alfie Chapman', message: 'Lorem Ipsum é ...' },
-        { name: 'Fabian Byrne', message: 'Lorem Ipsum é...' }
-    ];
-
-    return `<>
-        <Navbar>
-            <Icon href="/tests/home" icon="menu" />
-            <Text title="Inbox"/>
-            <Icon />
-        </Navbar>
-        <div class="block-title">Messages</div>
-        <div class='section-container'>
-            <div class="options"><List :loop="self.data" /></div>
-        </div>
-    </>`;
+function Profile () {
+    let self = this;
+    return `<div>
+        <h1>Profile</h1>
+        <p>Profile page</p>
+    </div>`;
 }
 
 function App() {
-    const self = this;
+    let self = this;
 
     self.test = function() {
         console.log(arguments)
     };
 
-    return `<>
-        <Router animation="true" onchange="{{self.test}}">
-            <Route path="/tests/home" controller="Home" />
-            <Route path="/tests/compose" url="/tests/compose/1" />
-            <Route path="/tests/profile" url="/tests/profile/1" />
+    return (render) => render`<>
+        <Router :animation="true" :onchangepage="self.test">
+            <Route path="/tests/home" :controller="${Home}" />
+            <Route path="/tests/compose" :controller="${Message}" />
+            <Route path="/tests/profile" :controller="${Profile}" />
         </Router>
         <Toolbar>
             <Icon content="inbox" title="Inbox" route="/tests/home" />
@@ -137,9 +142,38 @@ function App() {
 }
 
 // Set the components
-lemonade.setComponents({ Router, Toolbar, Home, Navbar, List });
+lemonade.setComponents({ Toolbar });
 // Render
 lemonade.render(App, document.getElementById('root'));
 </script>
-</html>
 ```
+```javascript
+import Message from './Message';
+import Profile from './Profile';
+import Home from './Home';
+
+export default function App() {
+    let self = this;
+
+    self.test = function () {
+        console.log(arguments);
+    };
+
+    return (render) => render`<>
+      <Router :animation="true" :onchangepage="self.test">
+          <Route path="/tests/compose" :controller="${Message}" />
+          <Route path="/tests/profile" :controller="${Profile}" />
+          <Route path="(.*)" :controller="${Home}" />
+      </Router>
+      <Toolbar>
+          <Icon content="inbox" title="Inbox" route="/tests/home" />
+          <Icon content="create" title="New message" route="/tests/compose" />
+          <Icon content="person" title="Profile" route="/tests/profile" />
+      </Toolbar>
+  </>`;
+}
+```
+
+## More resources
+
+- [JavaScript Router Example on Stackblitz](https://stackblitz.com/edit/vitejs-vite-xquqod)

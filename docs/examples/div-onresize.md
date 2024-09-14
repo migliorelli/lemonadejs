@@ -1,4 +1,4 @@
-title: DIV onresize
+title: DIV onresize - LemonadeJS
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, examples
 description: Learn how to implement a custom DIV onresize event using LemonadeJS and JavaScript Vanilla.
 

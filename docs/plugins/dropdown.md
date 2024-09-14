@@ -34,7 +34,7 @@ npm install @lemonadejs/dropdown
 | format?: number | Data format type, usually in the form of { id: name } or { value: text } |
 | width?: number | Specifies the width of the dropdown |
 | placeholder?: string | Placeholder text to guide users in the dropdown |
-
+| url?: string | Specifies the URL for fetching the data. Do not declare the `data` attribute for the url to function properly.  |
 
 ### Item Details
 
@@ -58,10 +58,8 @@ npm install @lemonadejs/dropdown
 | oninsert?: (instance, Item) => void       | Invoked after an item is added to the options through the insert feature.  |
 | onchange?: (instance, Item) => void       | Invoked when the value changes.                                            |
 | onload?: (instance, Item) => void         | Invoked when appended to the DOM.                                          |
-| onsearch?: (instance, Item) => void | Invoked when searching for an item.
- |
-| onbeforesearch?: (instance, Item) => void | Invoked before initiating a search.
- |
+| onsearch?: (instance, Item) => void | Invoked when searching for an item. |
+| onbeforesearch?: (instance, Item) => void | Invoked before initiating a search. |
 | onopen?: (instance) => void | Invoked when the dropdown is opened. |
 
 ## Dropdown Examples

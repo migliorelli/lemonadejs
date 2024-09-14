@@ -2,7 +2,7 @@ title: Get started with LemonadeJS
 keywords: LemonadeJS, getting started, two-way binding, frontend, javascript library, reactive, react, Vue, Angular, documentation,
 description: Kick off your LemonadeJS journey with this getting started guide, covering installation, basic reactive concepts, and more.
 
-![Getting started with LemonadeJS](img/getting-started.png)
+![Getting started with LemonadeJS](img/getting-started.png){.right}
 
 Getting started
 ===============

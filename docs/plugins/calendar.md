@@ -1,8 +1,8 @@
-title: LemonadeJS Calendar: Stylish reactive Date & Time Picker Component compatible Vue, React, Angular
-keywords: Sleek Calendar component, date and time picker, Vue compatible calendar, React calendar component, Angular calendar integration, functional date picker, customizable time picker, event management tool, deadline tracker, optimal performance UI component, lightweight calendar, stylish design, sophisticated date and time selection, web development tools, UI component for developers.
-description: Discover the versatility of our Sleek Calendar, a stylish and functional date and time picker component seamlessly compatible with Vue, React, and Angular. Effortlessly navigate through dates and select times flexibly for events or deadlines. This lightweight component ensures optimal performance and delivers a polished, customizable design. Unlock the perfect blend of style and functionality to simplify your tasks with understated sophistication.
+title: JavaScript Calendar - LemonadeJS
+keywords: JavaScript Calendar, Date and Time Picker, Range Picker, Vue, React, Angular, Customizable, Lightweight, High Performance, User-Friendly, Modern Design, Web Development, UI Components
+description: Elevate web projects with our reactive JavaScript Calendar, which is compatible with Vue, React, and Angular. Effortlessly manage events and deadlines with this customizable, high-performance date and time or range picker. Enhance your application with our lightweight, user-friendly component.
 
-![JavaScript Calendar](img/javascript-calendar.jpg){style="width: initial; margin: 60px;"}
+![JavaScript Calendar](img/javascript-calendar.jpg){.right style="width: initial; margin: 60px;"}
 
 JavaScript Calendar
 ==================
@@ -11,7 +11,16 @@ JavaScript Calendar
 
 `Component size: 3.18KB gzipped`{.small}
 
-Unlock versatility with our sleek calendar – seamlessly blending style with functionality. Effortlessly pick dates, navigate with ease, and select times flexibly. Ideal for events or deadlines, this lightweight component ensures optimal performance, delivering a polished, customizable design. Simplify your tasks with understated sophistication.
+
+The LemonadeJS Calendar is a versatile JavaScript calendar component designed for seamless integration with popular frameworks like React, VueJS, and Angular. This component enhances your web applications by providing an embeddable calendar picker that can be easily incorporated into HTML forms, facilitating straightforward date, time, and range selections. It is engineered to support keyboard navigation, ensuring a superior user experience. Notably lightweight and built with a reactive and responsive design, the LemonadeJS Calendar offers:
+
+- **Intuitive Keyboard Navigation**: Navigate dates using the keyboard for efficiency and accessibility.
+- **Reactive & Responsive Design**: Adapts smoothly to different devices and screen sizes.
+- **Flexible Range Selection**: Select date ranges with ease, ideal for booking systems and scheduling.
+- **Event-Driven Integration**: Seamless integration into your application workflow.
+- **Lightweight Architecture**: Optimized for speed and performance, ensuring minimal impact on load times.
+- **High Customizable**: Tailor the calendar's appearance and functionality to fit your project's needs.
+
 
 Documentation
 -------------
@@ -40,7 +49,11 @@ npm install @lemonadejs/calendar
 |----------------------------------|-------------------------------------|
 | onchange?: (self, value) => void | Called when a new date is selected. |
 
-### Examples
+## Examples
+
+### HTML Embed Example
+
+Embed the LemonadeJS Calendar into your web application to create a user-friendly date picker. Utilize event handling to integrate seamlessly with your application's functionality.
 
 ```html
 <html>
@@ -108,11 +121,9 @@ export default {
 <style></style>
 ```
 
-### Overview
-
-The LemonadeJS Calendar boasts a range of features that greatly enhance its flexibility and user-friendliness. These include the ability to pick date ranges, navigate through the calendar using keyboard controls, select specific times, and more.
-
 ### Range picking
+
+The LemonadeJS JavaScript Calendar provides various features that greatly enhance flexibility. These include picking date ranges, navigating through the calendar using keyboard controls, selecting specific times, and more.
 
 ```html
 <!-- codesandbox: https://codesandbox.io/p/sandbox/dreamy-waterfall-mh572x -->
@@ -160,77 +171,50 @@ export default function App() {
     const calendarRef = useRef();
     const inputRef = useRef();
 
-    const [ready, setReady] = useState(false);
-
-    useEffect(() => {
-        if (inputRef.current) {
-            setReady(true)
-        }
-    }, [inputRef.current])
-
     return (<>
         <input type='text' ref={inputRef}/>
-        {ready && (
-            <div>
-                <Calendar
-                    range={true}
-                    input={inputRef.current}
-                    ref={calendarRef}
-                />
-            </div>
-        )}
+        <Calendar range={true} input={inputRef} ref={calendarRef} />
     </>);
 }
 ```
 ```vue
 <!-- codesandbox: https://codesandbox.io/p/sandbox/funny-sea-yfxyjr -->
 <template>
-    <input type="text" ref="inputRef" />
-    <div v-if="ready">
-        <Calendar :input="inputRef" :range="true" ref="calendarRef" />
-    </div>
+  <input type="text" ref="inputRef" />
+  <Calendar :input="inputRef" ref="calendarRef" />
 </template>
 
 <script>
-import Calendar from '@lemonadejs/calendar/dist/vue'
+import { ref } from 'vue';
+
+import Calendar from '@lemonadejs/calendar/dist/vue';
 import "@lemonadejs/calendar/dist/style.css";
 import "@lemonadejs/modal/dist/style.css";
 
 export default {
-    name: 'App',
-    components: {
-        Calendar
-    },
-    watch: {
-        inputRef() {
-            if (this.inputRef) {
-                this.ready = true;
-            }
-        }
-    },
-    data() {
-        return { 
-            inputRef: null,
-            calendarRef: null,
-            ready: false,
-        }
-    },
-    mounted() {
-        // Accessing the DOM element using the ref after the component is mounted
-        this.inputRef = this.$refs.inputRef;
-        this.calendarRef = this.$refs.calendarRef;
-    },
+  name: 'App',
+  components: {
+      Calendar
+  },
+  setup() {
+    const inputRef = ref(null);
+
+    return {
+      inputRef,
+    };
+  }
 }
 </script>
 ```
 
 ## Codesandbox
 
-See a working example on codesandbox in different frameworks.
+### Working examples
 
-- [JavaScript Calendar](https://codesandbox.io/p/sandbox/dreamy-waterfall-mh572x){target="blank"}
-- [LemonadeJS Calendar](https://codesandbox.io/p/sandbox/lemonadejs-reactive-app-forked-wfjw3n){target="blank"}
-- [React Calendar](https://codesandbox.io/p/devbox/nostalgic-jackson-ljty72){target="blank"}
-- [VueJS Calendar](https://codesandbox.io/p/sandbox/funny-sea-yfxyjr){target="blank"}
+To explore practical implementations of the LemonadeJS Calendar component in different frameworks, you can visit the following CodeSandbox examples. Each link provides a unique setup tailored to a specific framework, allowing you to see the calendar in action and understand how it integrates within various development environments.
 
+- **[JavaScript Calendar](https://codesandbox.io/p/sandbox/dreamy-waterfall-mh572x){target="blank"}**: Experience the LemonadeJS Calendar in a vanilla JavaScript setting for a straightforward implementation.
+- **[LemonadeJS Calendar](https://codesandbox.io/p/sandbox/lemonadejs-reactive-app-forked-wfjw3n){target="blank"}**: Dive into a more advanced example showcasing the reactive features of the LemonadeJS Calendar in a dynamic application context.
+- **[React Calendar](https://codesandbox.io/p/devbox/nostalgic-jackson-ljty72){target="blank"}**: Integrate LemonadeJS calendar with React and enhancing your React applications with date, time or range picking functionalities.
+- **[VueJS Calendar](https://codesandbox.io/p/sandbox/funny-sea-yfxyjr){target="blank"}**: Explore the integration of the LemonadeJS Calendar within a VueJS application.
 

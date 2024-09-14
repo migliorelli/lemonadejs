@@ -2,7 +2,7 @@ title: LemonadeJS Sugar: A Redux-like Global State Manager,
 keywords: LemonadeJS, Sugar, global state, redux-like, frontend, javascript library, global artifacts, common container,
 description: Manage your application's global state using LemonadeJS Sugar, a redux-like state management solution for reactive web applications.
 
-![Global communication between components](img/sugar.svg){style="max-height: 200px"}
+![Global communication between components](img/sugar.svg){.right style="max-height: 200px"}
 
 Sugar (Super global artifacts)
 ==============================

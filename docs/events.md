@@ -7,9 +7,9 @@ LemonadeJS events
 
 This chapter will describe more about the two native events and the JavaScript event object (e). That can be defined inside your component to treat further and advance behavior.
 
-| Event | Description |
-| ----- | ----------- |
-| onload(component: DOMElement) | It happens when the component is mounted and ready in the DOM.  <br>`self.onload(component: DOMElement) => void` |
+| Event                                | Description                                                                                                                                                                                                                                                                                              |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onload(component: DOMElement)        | It happens when the component is mounted and ready in the DOM.  <br>`self.onload(component: DOMElement) => void`                                                                                                                                                                                         |
 | onchange(property, affectedElements) | It happens when the value of a self property in observation is updated.  <br>`self.onchange(property: string, affected: object) => void`  <br>`@param property` \- self property that triggered the event.  <br>`@param affectedElements` \- When the same property is bound to different HTML elements. |
   
 

@@ -2,7 +2,7 @@ title: LemonadeJS Rating: Engaging Rating Component for User Feedback
 keywords: LemonadeJS, rating, component, frontend, javascript library, javascript, interactive, user feedback
 description: LemonadeJS Rating Component is a user-friendly solution for quickly collecting user feedback and ratings in HTML forms.
 
-LemonadeJS Rating
+JavaScript Rating
 ======
 `Pico Library`{.jtag .black .framework-images}
 
@@ -182,4 +182,4 @@ methods: {
 Related content
 ---------------
 
-*   [Simple star rating implementation](/examples/rating)
+*   [Simple star rating implementation](/docs/examples/rating)

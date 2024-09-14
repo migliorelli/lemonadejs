@@ -16,10 +16,10 @@ const root = document.getElementById("root")
 let data = [];
 for (let i = 0; i < 500; i++) {
     data.push({
-        date: faker.date.between({ from: new Date(2023, 0, 1), to: new Date(2023, 11, 31)}),
+        date: faker.date.between(new Date(2023, 0, 1), new Date(2023, 11, 31)),
         title: faker.commerce.productName(),
-        subtitle: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
+        subtitle: faker.commerce.department(),
+        description: faker.commerce.productName(),
     })
 }
 

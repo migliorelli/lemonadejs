@@ -1,10 +1,11 @@
 title: JavaScript Components and Plugins
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, lists, loops, arrays, plugins
 description: Find out several useful JavaScript reactive components common to any web application.
+canonical: https://lemonadejs.net/docs/plugins
 
-![JavaScript Plugins](img/library.jpg)
+![JavaScript Plugins](img/library.jpg){.right}
 
-LemonadeJS Plugins
+LemonadeJS JavaScript Components
 ====================
 
 On the website, you can find different official components. We can categorize those as Pico Extension, Plugins, and Integrations.
@@ -37,7 +38,7 @@ Components
 
 The LemonadeJS component library includes other JavaScript plugins and components for common requirements.
 
-* [Data grid](/docs/plugins/data-grid) : A micro (5KBytes) JavaScript Data Grid with search, pagination, sorting.
+* [JavaScript Data Grid](/docs/plugins/data-grid) : A micro (5KBytes) JavaScript Data Grid with search, pagination, sorting.
 * [JavaScript Modal](/docs/plugins/modal) : Create advance resizable, draggable, closable or minimizable modals. 
 * [JavaScript Calendar](/docs/plugins/calendar) : JavaScript date picker with range selection and much more.
 * [JavaScript Dropdown](/docs/plugins/dropdown) : Highly performance autocomplete dropdown with groups, images and much more.

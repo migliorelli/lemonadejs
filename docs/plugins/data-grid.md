@@ -1,10 +1,10 @@
-title: JavaScript Data Grid
+title: JavaScript Data Grid - LemonadeJS
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, plugins
-description: A micro reactive javascript data grid with edition, search and pagination using LemonadeJS.
+description: A micro reactive javascript data grid with cell edition, search and pagination using LemonadeJS.
 
-![JavaScript Data Grid](img/javascript-data-grid.jpg){style="width: initial; margin: 60px;"}
+![JavaScript Data Grid](img/javascript-data-grid.jpg){.right style="width: initial; margin: 60px;"}
 
-LemonadeJS Data Grid
+JavaScript Data Grid
 ====================
 
 `JavaScript Components`{.jtag .black .framework-images}
@@ -32,6 +32,8 @@ npm install @lemonadejs/data-grid
 | pagination?: Number   | Enable the pagination and define the number of items per page.                                                                                               | 
 | search?: Boolean      | Enable the search. `Default: false`                                                                                                                          |
 | editable?: Boolean    | The grid is editable. `Default: false`                                                                                                                       |
+| resizable?: Boolean   | Enable the resizable functionality, allowing the columns to be resized. `Default: false`                                                                     |
+| zebra?: Boolean       | Enable the zebra style, highlighting every odd row with a darker color. `Default: false`                                                                     |
 
 ### Column Item
 
@@ -72,9 +74,9 @@ The columns property regulates the presentation of columns on the JavaScript dat
 Examples
 --------
 
-### How to create a data grid from JSON.
+### Create a Data Grid From a JSON.
 
-The LemonadeJS Data Grid component is designed for creating high-performance grids with features like search and pagination. It offers flexible settings for custom rendering and event handling. Below is a straightforward example demonstrating how to generate a grid from a JSON object:
+The LemonadeJS Data Grid component is designed for creating high-performance data grids with features like search and pagination. It offers flexible settings for custom rendering and event handling. Below is a straightforward example demonstrating how to generate a grid from a JSON object:
 
 ```html
 <html>
@@ -338,7 +340,7 @@ export default {
 </script>
 ```
 
-### Programmatic Updates and Working with Large Data Sets
+### Working with Large Data Sets
 
 Upon creating a new data grid in LemonadeJS, an instance is generated that simplifies programmatic modifications. The following example highlights the data grid's ability to handle and load a large dataset. It also demonstrates the process of fetching data after initiating the data grid.
 
@@ -357,11 +359,12 @@ const datagrid = Datagrid(document.getElementById('root'), {
         { name: 'firstname', title: 'First Name', width: '100px', align: 'center' },
         { name: 'lastname', title: 'Last Name', width: '100px', align: 'center' },
         { name: 'email', title: 'Email', width: '100px', align: 'left' },
-        { name: 'phone', title: 'Phone', width: '150px', align: 'center' },
-        { name: 'address.country', title: 'Country', width: '250px', align: 'left' },
+        { name: 'phone', title: 'Phone', width: '100px', align: 'center' },
+        { name: 'address.country', title: 'Country', width: '100px', align: 'left' },
     ],
     pagination: 10,
     search: true,
+    editable: true,
 })
 
 fetch('https://fakerapi.it/api/v1/persons?_quantity=500&_seed=1')
@@ -481,7 +484,8 @@ export default {
 ```
 
 ### Custom Cell Rendering
-This example demonstrates the render property, which enables HTML rendering within grid cells. This feature allows developers to design custom cell behaviours, tailoring the rendering process to specific requirements for each column.
+
+This example demonstrates the render property, which enables HTML rendering within data grid cells. This feature allows developers to design custom cell behaviours, tailoring the rendering process to specific requirements for each column.
 
 ```html
 <html>
@@ -650,4 +654,4 @@ Enterprise Data Grid
 
 Jspreadsheet is a remarkable commercial [data grid](https://jspreadsheet.com/) solution that offers a lightweight and efficient platform for building professional-grade data grids. It stands out with its Excel-like controls, providing users with a familiar and intuitive interface for data manipulation. With Jspreadsheet, developers can effortlessly create stunning and highly functional data grids that meet the highest standards of usability and aesthetics. Its lightweight design ensures optimal performance, allowing for seamless data rendering and interaction. Whether organizing, sorting, filtering, or performing complex calculations, Jspreadsheet empowers users to create fantastic, sophisticated data grids tailored to their needs.
 
-[Jspreadsheet Data grid](https://jspreadsheet.com/)
+[Jspreadsheet Data Grid](https://jspreadsheet.com/)

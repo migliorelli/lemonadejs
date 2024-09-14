@@ -6,7 +6,11 @@ Classes
 =======
 
 It is also possible to create reusable LemonadeJS components from JavaScript classes. The most important point when dealing with classes is that the `self` object is a reference to the `this` inside the class. Thus, you can update internal attributes or invoke the class methods from the self into the template as in the example below.  
-  
+
+## Example
+
+Create a basic counter as a JavaScript class.
+
 ```html
 <html>
 <script src="https://lemonadejs.net/v1/lemonade.js"></script>

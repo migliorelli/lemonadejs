@@ -1,4 +1,4 @@
-title: Classic hangman game reimagined with LemonadeJS,
+title: JavaScript Hangman Game with LemonadeJS,
 keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react, examples,
 description: Experience the classic hangman game with a simple and modern JavaScript implementation using LemonadeJS.
 

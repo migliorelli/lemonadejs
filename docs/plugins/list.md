@@ -2,7 +2,7 @@ title: LemonadeJS List - Arrays and Loops Simplified
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, lists, loops, arrays, plugins
 description: Explore the LemonadeJS List component, a powerful library for creating dynamic elements with search and pagination from arrays of objects.
 
-LemonadeJS List
+JavaScript List
 ===============================
 `Pico Library`{.jtag .black .framework-images}
 

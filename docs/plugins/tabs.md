@@ -2,7 +2,7 @@ title: LemonadeJS Tabs: Versatile and Dynamic JavaScript Component for Vue, Reac
 description: Explore the capabilities of LemonadeJS Tabs, a versatile and dynamic component designed to facilitate the organization and presentation of distinct content sections within a minimalist tabbed interface. This JavaScript component seamlessly integrates with Vue, React, and Angular, offering an intuitive solution to enhance content navigation and user experience.
 keywords: LemonadeJS Tabs, versatile JavaScript component, dynamic content organization, minimalist tabbed interface, Vue compatible, React integration, Angular tabs, intuitive navigation, user-friendly interface, optimal performance UI component, web development tools, UI component for developers.
 
-LemonadeJS Tabs
+JavaScript Tabs
 ===============
 
 Introducing the LemonadeJS JavaScript Tabs, a versatile and dynamic component designed to facilitate the organization and presentation of distinct content sections within a minimalist tabbed interface.  

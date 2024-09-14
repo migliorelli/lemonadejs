@@ -2,7 +2,7 @@ title: Component Loops using LemonadeJS
 keywords: LemonadeJS, two-way binding, frontend, javascript library, reactive, react, Vue, Angular, arrays, loops, lists
 description: Generate lists of elements from arrays using the loop attribute.
 
-![Reactive library loop](img/lemonadejs-array.jpg)
+![Reactive library loop](img/lemonadejs-array.jpg){.right}
 
 Arrays
 ======

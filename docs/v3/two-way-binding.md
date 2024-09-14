@@ -2,7 +2,7 @@ title: Two-Way Data Binding with LemonadeJS,
 keywords: LemonadeJS, two-way binding, frontend, javascript library, reactive, react, Vue, Angular,
 description: Achieve real-time synchronization between JavaScript and views using LemonadeJS's efficient two-way data binding.
 
-![Two-way data binding](img/two-way-binding-animation.svg)
+![Two-way data binding](img/two-way-binding-animation.svg){.right}
 
 Two-way data binding
 ====================

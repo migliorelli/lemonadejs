@@ -1,16 +1,15 @@
-title: JavaScript Timeline: Versatile JavaScript Timeline Plugin
-description: LemonadeJS Timeline is a framework-agnostic JavaScript plugin perfect can be integrated with Vue, React, and Angular developers. Effortlessly create interactive logs, event highlights, and minimalist roadmaps with extensive customization options. Modify colours, content, and point positions with ease. Featuring automatic monthly event grouping and intuitive navigation, LemonadeJS Timeline simplifies complex data visualization.
-keywords: JavaScript timeline plugin, LemonadeJS Timeline, framework-agnostic JavaScript tool, Vue compatible timeline, React timeline component, Angular timeline integration, customizable timeline plugin, interactive logs JavaScript, roadmap visualization tool, monthly event grouping, data visualization JavaScript, UI component for developers, web development tools, timeline navigation feature.
+title: JavaScript Timeline Plugin
+description: LemonadeJS Timeline is a framework-agnostic JavaScript plugin for creating dynamic, customizable timelines. Perfect for Vue, React, and Angular, it offers intuitive event grouping and easy navigation for effective data visualization.
+keywords: JavaScript Timeline, LemonadeJS, Vue, React, Angular, Customizable, Event Grouping, Data Visualization
 
-![JavaScript Timeline](img/javascript-timeline.jpg){style="width: initial; margin: 60px;"}
+![JavaScript Timeline](img/javascript-timeline.jpg){.right style="width: initial; margin: 60px;"}
 
-LemonadeJS Timeline
+JavaScript Timeline
 ===============
 
 `Pico Library`{.jtag .black .framework-images}
 
-LemonadeJS Timeline is a framework-agnostic JavaScript plugin that offers integration with **Vue**, **React**, and **Angular**. Designed to enable developers to craft logs, event highlights, and minimalist roadmaps easily, it provides extensive customization options. Users have the flexibility to modify colours, content, and point positions and can take advantage of the automatic event grouping by month, complete with navigation functionality.
-
+The LemonadeJS JavaScript Timeline is a framework-agnostic plugin designed for timeline creation, supporting Vue, React, and Angular integration. It facilitates the construction of logs, event timelines, and roadmaps, providing options for customization such as color adjustments, content modification, and control over point positioning. The plugin includes features for automatically grouping events by month and navigation controls, aiding in organizing and displaying timeline data.
 
 ## Documentation
 
@@ -20,30 +19,36 @@ LemonadeJS Timeline is a framework-agnostic JavaScript plugin that offers integr
 npm install @lemonadejs/timeline
 ```
 
-### Settings
+### Configuration Options
 
-| Attribute      | Type         | Description                                                                                                        |
-|----------------|--------------|--------------------------------------------------------------------------------------------------------------------|
-| data           | Item[]       | An array of items to be displayed. Each item should follow the structure defined in the 'Item Properties' section. |
-| type?          | string       | There are default and monthly types. The latter will create a navigation per month and group all items.            |
-| align?         | string       | Align the bullet points. Accepted values include "left", "right", "top", and "bottom". `Default:  "left"`.         |
-| message?       | string       | Will show when no data to display                                                                                  |
-| order?         | string       | Accepted values are 'asc' for ascending and 'desc' for descending order. |
-| width? | number | Determines the width of the timeline container. |
-| height? | number | Determines the height of the timeline container. |
+Initialize the timeline with these settings to tailor the plugin to your specific needs:
 
-### Item Properties
+| Attribute       | Type          | Description                                                                                                        |
+|-----------------|---------------|--------------------------------------------------------------------------------------------------------------------|
+| data            | Item[]        | An array of items to be displayed. Each item should follow the structure defined in the 'Item Properties' section. |
+| type?           | string        | There are default and monthly types. The latter will create a navigation per month and group all items.            |
+| align?          | string        | Align the bullet points. Accepted values include "left", "right", "top", and "bottom". `Default:  "left"`.         |
+| message?        | string        | Will show when no data to display                                                                                  |
+| order?          | string        | Accepted values are 'asc' for ascending and 'desc' for descending order.                                           |
+| width?          | number        | Determines the width of the javascript timeline container.                                                         |
+| height?         | number        | Determines the height of the javascript timeline container.                                                                   |
 
-| Attribute             | Description                                                                    |
-|-----------------------|--------------------------------------------------------------------------------|
-| date?: string         | A date associated with the item, providing chronological information. |
-| title?: string      | Title for the item.                                                            |
-| subtitle?: string     | Sub caption for the item.                                                      |
-| description?: string  | Item description.                                                              |
-| borderColor?: string  | Border color                                                                   |
-| borderStyle?: string  | Define the style of the item's border, such as "solid," "dashed," or "dotted." |
+### Entry Attributes
 
-### Events
+Define each timeline event with these specific properties to customize its appearance and behavior:
+
+| Attribute              | Description                                                                     |
+|------------------------|---------------------------------------------------------------------------------|
+| date?: string          | A date associated with the item, providing chronological information.           |
+| title?: string         | Title for the item.                                                             |
+| subtitle?: string      | Sub caption for the item.                                                       |
+| description?: string   | Item description.                                                               |
+| borderColor?: string   | Border color                                                                    |
+| borderStyle?: string   | Define the style of the item's border, such as "solid," "dashed," or "dotted."  |
+
+### Event Handling
+
+Utilize this event to monitor user interactions, enabling data synchronization with the server:
 
 | Event                  | Trigger                            |
 |------------------------|------------------------------------|
@@ -51,13 +56,13 @@ npm install @lemonadejs/timeline
 
 ## Examples
 
-The JavaScript timeline plugin offers a variety of options for customizing both style and behaviour to suit your project's needs. Below are several examples demonstrating how to use these options.
+This section illustrates practical applications of the JavaScript timeline plugin, highlighting customization techniques for style and functionality to align with specific project objectives.
 
 See more examples on https://codesandbox.io/p/sandbox/frosty-babycat-cjcwrk
 
-### Appearance
+### Styling Attributes
 
-The position, border style and colours can be defined using the component's attributes during initialization as below. 
+Customize the visual aspects such as position, border style, and color schemes by setting the corresponding attributes during the initialization phase as demonstrated below: 
 
 ```html
 <html>
@@ -205,9 +210,9 @@ export default {
 </style>
 ```
 
-### Timeline position
+### Positioning Options
 
-You have the option to position the timeline in four different ways: left, right, bottom, or top. Also, you can change that programatically as example below.
+Configure the placement of the timeline on the page by choosing from four positions: left, right, bottom, or top. Adjustments can also be made programmatically, as shown in the following example:
 
 ```html
 <html>
@@ -274,8 +279,6 @@ export default function App() {
 }
 ```
 ```jsx
-// codesandbox: https://codesandbox.io/p/devbox/xenodochial-aj-9rdn66
-
 import React, { useRef } from 'react';
 import Timeline from '@lemonadejs/timeline/dist/react';
 
@@ -303,8 +306,6 @@ export default function App() {
 }
 ```
 ```vue
-<!-- codesandbox: https://codesandbox.io/p/devbox/vigorous-wozniak-5dl5rk -->
-
 <template>
     <label>Choose a position to align:</label>
     <select @change="this.$refs.timelineRef.current.align = $event.target.value">
@@ -337,10 +338,12 @@ export default {
 </script>
 ```
 
+- See this [React Timeline](https://codesandbox.io/p/devbox/xenodochial-aj-9rdn66) example on codesandbox;
+- See this [Vue Timeline](https://codesandbox.io/p/devbox/vigorous-wozniak-5dl5rk) example on codesandbox;
 
-### Monthly Type
+### Monthly View Configuration
 
-The monthly type will be a monthly navigation control and organize the data based on its respective month and year.
+This setting enables a navigation control for monthly views, automatically grouping entries by their respective month and year.
 
 ```html
 <html>
@@ -356,13 +359,13 @@ const root = document.getElementById("root")
 let data = [];
 for (let i = 0; i < 500; i++) {
     data.push({
-        date: faker.date.between({ from: new Date(2024, 0, 1), to: new Date(2024, 11, 31)}),
+        date: faker.date.between(new Date(2023, 1, 1), new Date(2024, 12, 30)),
         title: faker.commerce.productName(),
-        subtitle: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
+        subtitle: faker.commerce.department(),
+        description: faker.commerce.productName(),
     })
 }
-
+console.log(data)
 const timeline = Timeline(root, {
     data: data,
     type: 'monthly',
@@ -386,10 +389,10 @@ export default function App() {
     self.data = [];
     for (let i = 0; i < 10; i++) {
         self.data.push({
-            date: faker.date.between({ from: new Date(2023, 0, 1), to: new Date(2023, 11, 31)}),
+            date: faker.date.between(new Date(2023, 1, 1), new Date(2024, 12, 30)),
             title: faker.commerce.productName(),
-            subtitle: faker.commerce.productName(),
-            description: faker.commerce.productDescription(),
+            subtitle: faker.commerce.department(),
+            description: faker.commerce.productName(),
         })
     }
 
@@ -406,10 +409,10 @@ import '@lemonadejs/timeline/dist/style.css';
 let data = [];
 for (let i = 0; i < 10; i++) {
     data.push({
-        date: faker.date.between({ from: new Date(2023, 0, 1), to: new Date(2023, 11, 31)}),
+        date: faker.date.between(new Date(2023, 1, 1), new Date(2024, 12, 30)),
         title: faker.commerce.productName(),
-        subtitle: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
+        subtitle: faker.commerce.department(),
+        description: faker.commerce.productName(),
     })
 }
 
@@ -437,10 +440,10 @@ export default {
         let data = [];
         for (let i = 0; i < 1000; i++) {
             data.push({
-                date: faker.date.between({ from: new Date(2023, 0, 1), to: new Date(2023, 11, 31)}),
+                date: faker.date.between(new Date(2023, 1, 1), new Date(2024, 12, 30)),
                 title: faker.commerce.productName(),
-                subtitle: faker.commerce.productName(),
-                description: faker.commerce.productDescription(),
+                subtitle: faker.commerce.department(),
+                description: faker.commerce.productName(),
             })
         }
         return {
@@ -451,10 +454,9 @@ export default {
 </script>
 ```
 
-
 ### Sorting
 
-The timeline can be organized either in ascending or descending order based on dates. This feature enhances the user experience by providing flexibility in viewing chronological events.
+Configure the timeline to display events in ascending or descending chronological order.
 
 ```html
 <html>

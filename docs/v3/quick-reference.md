@@ -2,7 +2,7 @@ title: LemonadeJS Quick Reference: Essential Concepts & Features,
 keywords: LemonadeJS, quick reference, frontend, javascript library, reactive, react, documentation,
 description: Explore the essential LemonadeJS concepts, features, and techniques in this concise, quick reference guide, designed to help you master LemonadeJS faster.
 
-![JavaScript library documentation](img/quick-reference.svg)
+![JavaScript library documentation](img/quick-reference.svg){.right}
 
 Quick reference
 ===============

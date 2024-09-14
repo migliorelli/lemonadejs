@@ -2,7 +2,7 @@ title: LemonadeJS Signature Pad
 keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react, signature pad, plugins
 description: Delve into an optimized reactive JavaScript signature pad implementation using the power of LemonadeJS.
 
-LemonadeJS Signature Pad
+JavaScript Signature Pad
 =============
 `Pico Library`{.jtag .black .framework-images}
 

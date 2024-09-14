@@ -1,8 +1,8 @@
-title: JavaScript Modal: Responsive and Reactive Floating Modals for Vue, React, Angular | LemonadeJS
+title: JavaScript Modal - LemonadeJS
 keywords: LemonadeJS Modal, responsive modal, reactive component, floating modals, Vue, React, Angular, draggable modals, closable modals, resizable modals, user interaction, UI optimization, web development, JavaScript UI components
 description: Discover LemonadeJS Modal, a dynamic and responsive JavaScript component for creating floating modals in web applications. It is designed for versatility and features configurable options like draggability, closability, and resizability, enhancing user interaction and integration across Vue, React, and Angular.
 
-![JavaScript Modal](img/javascript-modal.jpg){style="width: initial; margin: 60px;"}
+![JavaScript Modal](img/javascript-modal.jpg){.right style="width: initial; margin: 60px;"}
 
 # JavaScript Modal
 

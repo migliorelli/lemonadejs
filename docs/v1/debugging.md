@@ -57,3 +57,5 @@ var Component = (function(root) {
 })
 lemonade.render(Component, document.getElementById('root'));
 ```
+
+If you need more information, please reach out on support@jspreadsheet.com or in our GitHub issues page https://gibhut.com/lemonadejs/lemonadejs.

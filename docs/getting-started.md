@@ -2,7 +2,7 @@ title: Getting Started with LemonadeJS v4: Reactive Programming for Frontend Dev
 keywords: LemonadeJS, JavaScript library, reactive programming, two-way data binding, frontend architecture, micro-library efficiency, version 4 documentation
 description: Initiate development with LemonadeJS v4, the advanced reactive micro-library tailored for efficient front-end development. Learn the mechanics of two-way data binding and state management to construct performant web interfaces. Delve into version 4's technical advancements and streamlined API in our detailed documentation.
 
-![Getting started with LemonadeJS](img/getting-started-with-lemonadejs.jpg)
+![Getting started with LemonadeJS](img/getting-started-with-lemonadejs.jpg){.right}
 
 Getting started
 ===============
@@ -62,14 +62,6 @@ npm run start
 After executing these steps, open your web browser to the address provided by the development server. You're now ready to develop with LemonadeJS and see your changes in real-time. Enjoy crafting your reactive interfaces!
   
   
-## IDE
-
-### VSCode Extension
-
-You can install this extension to get your templates properly highlighted.
-
-[VSCode Code Highlight Extension](https://marketplace.visualstudio.com/items?itemName=nicolasjesse.lemonadejs-highlight)
-
 
 Official components
 -------------------

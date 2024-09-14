@@ -14,23 +14,25 @@ In this section, we delve into LemonadeJS' core and sugar methods, which are piv
 
 The core methods are instrumental in crafting, declaring, and presenting elements within the DOM. 
 
-| Method | Description                                                                                                                                                                    |
-| --- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| element(string, object, object) | Generates DOM elements from an HTML string and binds them to a `self` object. Syntax: `lemonade.element(template: String, self: Object, components: Object) => DOMElement`     |
-| render(DOMElement, DOMElement, object?) | Attaches LemonadeJS components to a specified DOM root. Syntax: `lemonade.render(component: Function, root: HTMLElement, self?: object, template?: HTMLElement) => DOMElement` |
-| apply(DOMElement, object, object) | Associates a 'self' scope with an existing DOM element. Syntax: `lemonade.apply(root: HTMLElement, self: Object, components: Object) => void` |
-| setComponents(object) | Includes component references for global application use. Syntax: `lemonade.setComponents(components: object) => void`                                                         |
+| Method                                       | Description                                                                                                                                                                    |
+|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| element(string, object, object)              | Generates DOM elements from an HTML string and binds them to a `self` object. Syntax: `lemonade.element(template: String, self: Object, components: Object) => DOMElement`     |
+| render(DOMElement, DOMElement, object?)      | Attaches LemonadeJS components to a specified DOM root. Syntax: `lemonade.render(component: Function, root: HTMLElement, self?: object, template?: HTMLElement) => DOMElement` |
+| apply(DOMElement, object, object)            | Associates a 'self' scope with an existing DOM element. Syntax: `lemonade.apply(root: HTMLElement, self: Object, components: Object) => void`                                  |
+| setComponents(object)                        | Includes component references for global application use. Syntax: `lemonade.setComponents(components: object) => void`                                                         |
+| path(string, boolean)                        | Extract the value from an object based on a address. Syntax: `lemonade.path(str: string, config: boolean) => any`                                                              |
+| createWebComponent(string, Function, object) | Includes component references for global application use. Syntax: `lemonade.createWebComponent(name: string, handler: Function, options: WebComponentOptions) => void`                                                         |
 
 
 ### Sugar functions
 
 The sugar methods facilitate seamless communication across various components. These methods provide the foundation and communication channels necessary for creating dynamic and interactive web components with LemonadeJS.
 
-| Method | Description |
-| --- | --- |
+| Method                         | Description                                                                                                                                                                          |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | set(string, self, persistence) | Shares a 'self' or a data dispatcher within the Sugar common container for component-wide access. Syntax: `lemonade.set(alias: String, self: Object, persistence?: Boolean) => void` |
-| get(string) | Retrieves a 'self' reference from the Sugar container. Syntax: `lemonade.get(alias: String) => Object | Function` |
-| dispatch(string, data) | Initiates a data dispatcher. Syntax: `lemonade.dispatch(alias: String, data: Object) => void` |
+| get(string)                    | Retrieves a 'self' reference from the Sugar container. Syntax: `lemonade.get(alias: String) => Object                                                                                | Function` |
+| dispatch(string, data)         | Initiates a data dispatcher. Syntax: `lemonade.dispatch(alias: String, data: Object) => void`                                                                                        |
 
  
 ## Examples

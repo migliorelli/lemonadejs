@@ -1,11 +1,11 @@
-title: JavaScript Color Picker
+title: JavaScript Color Picker - LemonadeJS
 keywords: LemonadeJS, Two-Way Data Binding, Frontend, JavaScript Library, JavaScript Plugin, JavaScript, Reactive, React, Color Picker
 description: LemonadeJS introduces a versatile and responsive JavaScript color picker. This reactive component simplifies the color selection process in web applications.
 
 
-![JavaScript Color Picker](img/javascript-color-picker.jpg){style="margin: 40px; width: initial;"}
+![JavaScript Color Picker](img/javascript-color-picker.jpg){.right style="margin: 40px; width: initial;"}
 
-JavaScript Color picker
+JavaScript Color Picker
 =======================
 
 `JavaScript Components`{.jtag .black .framework-images}

@@ -39,7 +39,7 @@ npm install lemonadejs
 Component and plugins gallery
 -----------------------------
 
-It could be very interesting for you to check our [component gallery](/v1/components). It brings several plugins and contributions to help you understand the capabilities and boost the development time when builing new applications.
+It could be very interesting for you to check our [component gallery](/docs/v1/components). It brings several plugins and contributions to help you understand the capabilities and boost the development time when builing new applications.
 
   
 

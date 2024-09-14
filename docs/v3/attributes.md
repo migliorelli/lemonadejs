@@ -2,7 +2,7 @@ title: Leveraging Reactive Attributes in LemonadeJS,
 keywords: LemonadeJS, two-way binding, frontend, javascript library, reactive, react, Vue, Angular, special attributes,
 description: Harness the power of LemonadeJS's special reactive attributes to create seamless interactions between views and controllers.
 
-![Two-way data binding examples](img/forms.png)
+![Two-way data binding examples](img/forms.png){.right}
 
 The special attributes
 ======================

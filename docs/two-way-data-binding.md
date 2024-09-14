@@ -1,10 +1,10 @@
-title: Real-Time Two-Way Data Binding with LemonadeJS
+title: Two-Way Data Binding - LemonadeJS
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, reactive, React, VueJS, AngularJS,
 description: Achieve real-time synchronization between JavaScript and views using LemonadeJS for two-way data binding.
 
-![Two-way data binding](img/learning-two-way-data-binding.jpg)
+![Two-way Data Binding](img/learning-two-way-data-binding.jpg){.right}
 
-Two-way data binding
+Two-way Data Binding
 ====================
 
 **Two-way data binding** is a technique that streamlines a value synchronization between a JavaScript variable reference and its corresponding HTML element value and vice versa.
@@ -17,13 +17,13 @@ LemonadeJS offers the special `:bind` attributes for DOM elements to ensure that
 {style="max-width: 500px" class="green"}
  
 
-Two-way data binding examples
+Two-way Data Binding examples
 -----------------------------
 
 The following examples show how to bind simple and more complex native HTML elements, such as multiple dropdowns and checkboxes.  
   
 
-### Text input
+### Data Binding On Input Text
 
 The :bind creates a transparent event to keep the self property in sync with the value of the input text.  
   
@@ -247,7 +247,7 @@ lemonade.render(Component, document.getElementById('root'));
 
 ### Integration with custom third-party plugins
 
-The following example shows a jSuites Tags Plugin integrated with LemonadeJS.  
+The following example shows a jSuites [JavaScript Tags](https://jsuites.net/docs/javascript-tags) Plugin integrated with LemonadeJS.  
   
 ```html
 <html>
@@ -281,7 +281,7 @@ The tags plugin component implements val() to integrate with LemonadeJS :bind.
 
 #### More custom-integrated custom components
 
-- For more about other components, please visit the [javascript plugins](https://jsuites.net/v4) website.
+- For more about other components, please visit the [javascript plugins](https://jsuites.net/docs) website.
 
 
 > Conclusion

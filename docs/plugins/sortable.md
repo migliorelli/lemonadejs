@@ -2,7 +2,7 @@ title: Create Reactive Sortable Lists with LemonadeJS
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, sortable
 description: Design interactive, reactive sortable lists using the intuitive Lemonade Sortable JavaScript plugins.
 
-LemonadeJS Sortable
+JavaScript Sortable
 ========
 
 This library has 1.3 Kbytes
@@ -14,11 +14,11 @@ Documentation
 
 ### Attributes
 
-| Attribute | Description |
-| --- | --- |
-| data: Array <Object> | Data should be an array of objects. |
-| draggable?: boolean | Enable or disable drag and drop. |
-| onchange?: function | The method is fired when a drag event occurs. |
+| Attribute            | Description                                   |
+|----------------------|-----------------------------------------------|
+| data: Array <Object> | Data should be an array of objects.           |
+| draggable?: boolean  | Enable or disable drag and drop.              |
+| onchange?: function  | The method is fired when a drag event occurs. |
 
 Usage example
 -------------

@@ -1,8 +1,8 @@
-title: JavaScript Context Menu
+title: JavaScript Context Menu - LemonadeJS
 keywords: LemonadeJS Context Menu, versatile navigation component, customizable menu, Vue compatibility, React integration, Angular support, efficient decision-making, configurable options, responsive menu system, user-friendly interface, UI component for developers.
 description: Multi-use, flexible, reactive JavaScript context menu plugin. This component facilitates efficient decision-making with configurable options, making it a valuable addition to applications seeking a responsive and user-friendly menu system.
 
-LemonadeJS Context Menu
+JavaScript Context Menu
 ==================
 
 The LemonadeJS Context Menu is a reactive JavaScript plugin to create dynamic and interactive menu navigation on web applications. It provides a customizable and user-friendly experience, featuring intelligent configurations that automatically adjust the menu's position to prevent it from disappearing off-screen, thus enhancing both the user experience and the responsive design of your application.

@@ -1,3 +1,7 @@
+title: Two-way data binding | LemonadeJS v1
+keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react
+description: Learning more about how two-way data binding helps to implement a synchronization between a the JavaScript and the view on LemonadeJS version 1.
+
 ![Two-way data binding](img/two-way-binding.png)
 
 Two-way binding

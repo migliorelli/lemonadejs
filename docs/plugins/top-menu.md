@@ -3,7 +3,7 @@ description: Elevate your application's user interface with the LemonadeJS Top M
 keywords: LemonadeJS Top Menu, application top menu, functional component, user experience, usability, organized interface, efficient navigation, essential features, clarity in design, simplicity in navigation, centralized access, core functionalities, improved user experience, adaptable nature, seamless integration, diverse applications, consistent menu system, responsive menu, application requirements.
 
 
-LemonadeJS Top Menu
+JavaScript Top Menu
 ==================
 
 The LemonadeJS Top Menu is a functional component designed to facilitate convenient access to key actions within your application. Comprising a set of thoughtfully arranged buttons, this interface ensures a straightforward and efficient user experience.
@@ -22,30 +22,30 @@ npm install @lemonadejs/topmenu
 
 ### Settings
 
-| Property  | Type | Description |
-|-----------|------|-------------|
-| options | optionItem[] | An array of option objects describing the rendering options. Each item should follow the structure defined in the 'Option Properties' section below.  |
+| Property   | Type         | Description                                                                                                                                          |
+|------------|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| options    | optionItem[] | An array of option objects describing the rendering options. Each item should follow the structure defined in the 'Option Properties' section below. |
 
 ### Options Properties
 
-| Property  | Type | Description |
-|-----------|------|-------------|
-| title? | string | The title text associated with the option. |
-| submenu? | submenuItem[] | An optional array containing options displayed as a sub-menu. Each item should follow the structure defined in the 'Submenu Properties' section below. |
+| Property   | Type          | Description                                                                                                                                            |
+|------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| title?     | string        | The title text associated with the option.                                                                                                             |
+| submenu?   | submenuItem[] | An optional array containing options displayed as a sub-menu. Each item should follow the structure defined in the 'Submenu Properties' section below. |
 
 ### Submenu Properties
 
-| Property  | Type | Description |
-|-----------|------|-------------|
-| title? | string | The title text associated with the option. |
-| submenu? | array of submenu options | An optional array containing options displayed as a submenu. |
-| onclick? | function | Onclick event for the contextmenu item. |
-| render? | function | The function executed when rendering the option. |
-| type? | string | Context menu item type: line, divisor, default. |
-| id? | string | HTML id property of the item DOM element. |
-| disabled? | boolean | Item is disabled. |
-| shortcut? | string | A short description or instruction for the item. Normally a shortcut. `Ex. CTRL + C`. |
-| tooltip? | string | Show this text when the user mouse over the element. |
+| Property    | Type                     | Description                                                                           |
+|-------------|--------------------------|---------------------------------------------------------------------------------------|
+| title?      | string                   | The title text associated with the option.                                            |
+| submenu?    | array of submenu options | An optional array containing options displayed as a submenu.                          |
+| onclick?    | function                 | Onclick event for the contextmenu item.                                               |
+| render?     | function                 | The function executed when rendering the option.                                      |
+| type?       | string                   | Context menu item type: line, divisor, default.                                       |
+| id?         | string                   | HTML id property of the item DOM element.                                             |
+| disabled?   | boolean                  | Item is disabled.                                                                     |
+| shortcut?   | string                   | A short description or instruction for the item. Normally a shortcut. `Ex. CTRL + C`. |
+| tooltip?    | string                   | Show this text when the user mouse over the element.                                  |
 
 ### Keyboard Accessibility and Focus Management
 
