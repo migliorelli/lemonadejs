@@ -374,3 +374,10 @@ lemonade.render(Component, root);
 </script>
 </html>
 ```
+
+## Changelog
+
+### modal@3.1.0
+
+- Resizing now works in all directions;
+- Close and minimize icons are now accessible via keyboard;
