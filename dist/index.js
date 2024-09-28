@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v4.3.2 (ESM build)
+ * LemonadeJS v4.3.3 (ESM build)
  *
  * Website: https://lemonadejs.net
  * Description: Create amazing web based reusable components.
@@ -780,18 +780,20 @@ function Lemonade() {
                     } else {
                         if (attr[k[i]] !== value) {
                             if (typeof(value) === 'function' || typeof(value) === 'object') {
-                                // Do not make sense to set an function or object to a HTML attribute
+                                // Do not make sense to set a function or object to a HTML attribute
                                 element[k[i]] = value;
                                 // Make sure the HTML is blank
-                                element.setAttribute(k[i], '');
+                                element.removeAttribute(k[i]);
                             } else {
-                                // Make sure the HTML is blank
+                                // Make sure the HTML matches the value
                                 element.setAttribute(k[i], value);
+                                // Parse attributes
+                                parseAttribute.call(self, element, k[i]);
                             }
+                        } else {
+                            // Parse attributes
+                            parseAttribute.call(self, element, k[i]);
                         }
-
-                        // Parse attributes
-                        parseAttribute.call(self, element, k[i]);
                     }
                 }
             }
@@ -1196,7 +1198,7 @@ function Lemonade() {
         const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
-        if (customElements.get(componentName)) {
+        if (window.customElements.get(componentName)) {
             console.warn(`${componentName} is already defined.`);
         } else {
             class Component extends HTMLElement {

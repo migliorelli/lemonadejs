@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v4.3.0
+ * LemonadeJS v4.3.3
  *
  * Website: https://lemonadejs.net
  * Description: Create amazing web based reusable components.
@@ -881,12 +881,11 @@
             console.error('Invalid DOM')
             return false;
         }
-        // Sub-components
+
         if (! components) {
             components = {};
         }
-        // Dynamic template
-        let literalControl;
+
         // Flexible element (class or method)
         if (typeof(o) == 'function') {
             if (isClass(o)) {
@@ -1204,7 +1203,7 @@
         const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
-        if (customElements.get(componentName)) {
+        if (window.customElements.get(componentName)) {
             console.warn(`${componentName} is already defined.`);
         } else {
             class Component extends HTMLElement {
