@@ -2,7 +2,7 @@
 
 ## Create amazing web-based interfaces with LemonadeJS
 
-![Micro Library](https://lemonadejs.net/templates/default/img/lemonadejs-home.jpg)
+![Micro Library](https://lemonadejs.com/templates/default/img/lemonadejs-home.jpg)
 
 LemonadeJS is a super lightweight reactive vanilla javascript micro-library (7 KBytes). It helps to integrate the JavaScript (controllers) and the HTML (view). It supports two-way data binding and integrates natively with jSuites to help to create amazing interfaces quicker.<br><br>
 
@@ -209,56 +209,56 @@ This software is free to use, and it is distributed under the MIT license.
 
 ### Documentation
 
-* [Getting started](https://lemonadejs.net/docs/getting-started)
-* [Attributes](https://lemonadejs.net/docs/attributes)
-* [Two-way binding](https://lemonadejs.net/docs/two-way-binding)
-* [Arrays](https://lemonadejs.net/docs/arrays)
-* [Methods](https://lemonadejs.net/docs/methods)
-* [Events](https://lemonadejs.net/docs/events)
-* [Components](https://lemonadejs.net/docs/components)
-* [Classes](https://lemonadejs.net/docs/classes)
-* [Web components](https://lemonadejs.net/docs/web-components)
-* [Quick reference](https://lemonadejs.net/docs/quick-reference)
-* [Debugging](https://lemonadejs.net/docs/debugging)
-* [Contributing](https://lemonadejs.net/docs/contributions)
+* [Getting started](https://lemonadejs.com/docs/getting-started)
+* [Attributes](https://lemonadejs.com/docs/attributes)
+* [Two-way binding](https://lemonadejs.com/docs/two-way-binding)
+* [Arrays](https://lemonadejs.com/docs/arrays)
+* [Methods](https://lemonadejs.com/docs/methods)
+* [Events](https://lemonadejs.com/docs/events)
+* [Components](https://lemonadejs.com/docs/components)
+* [Classes](https://lemonadejs.com/docs/classes)
+* [Web components](https://lemonadejs.com/docs/web-components)
+* [Quick reference](https://lemonadejs.com/docs/quick-reference)
+* [Debugging](https://lemonadejs.com/docs/debugging)
+* [Contributing](https://lemonadejs.com/docs/contributions)
 
 
 ### Utilities
 
-* [Awesome](https://lemonadejs.net/docs/awesome)
-* [Sugar](https://lemonadejs.net/docs/sugar)
-* [Testing](https://lemonadejs.net/docs/tests)
-* [Plugins](https://lemonadejs.net/docs/plugins)
-* [Module (ESM)](https://lemonadejs.net/docs/module)
+* [Awesome](https://lemonadejs.com/docs/awesome)
+* [Sugar](https://lemonadejs.com/docs/sugar)
+* [Testing](https://lemonadejs.com/docs/tests)
+* [Plugins](https://lemonadejs.com/docs/plugins)
+* [Module (ESM)](https://lemonadejs.com/docs/module)
 
 
 ### Libraries
 
-* [JavaScript List](https://lemonadejs.net/docs/plugins/list)
-* [JavaScript Rating](https://lemonadejs.net/docs/plugins/rating)
-* [JavaScript Router](https://lemonadejs.net/docs/plugins/router)
-* [JavaScript Signature](https://lemonadejs.net/docs/plugins/signature)
-* [JavaScript Data grid](https://lemonadejs.net/docs/plugins/data-grid)
-* [JavaScript Image Cropper](https://lemonadejs.net/docs/plugins/image-cropper)
-* [JavaScript Modal](https://lemonadejs.net/docs/plugins/modal)
-* [JavaScript Tabs](https://lemonadejs.net/docs/plugins/tabs)
-* [JavaScript Calendar](https://lemonadejs.net/docs/plugins/calendar)
-* [JavaScript Color picker](https://lemonadejs.net/docs/plugins/color-picker)
+* [JavaScript List](https://lemonadejs.com/docs/plugins/list)
+* [JavaScript Rating](https://lemonadejs.com/docs/plugins/rating)
+* [JavaScript Router](https://lemonadejs.com/docs/plugins/router)
+* [JavaScript Signature](https://lemonadejs.com/docs/plugins/signature)
+* [JavaScript Data grid](https://lemonadejs.com/docs/plugins/data-grid)
+* [JavaScript Image Cropper](https://lemonadejs.com/docs/plugins/image-cropper)
+* [JavaScript Modal](https://lemonadejs.com/docs/plugins/modal)
+* [JavaScript Tabs](https://lemonadejs.com/docs/plugins/tabs)
+* [JavaScript Calendar](https://lemonadejs.com/docs/plugins/calendar)
+* [JavaScript Color picker](https://lemonadejs.com/docs/plugins/color-picker)
 
 
 ### Examples
 
-* [Lamp](https://lemonadejs.net/docs/examples/lamp">)
-* [Counter](https://lemonadejs.net/docs/examples/counter">)
-* [Color generator](https://lemonadejs.net/docs/examples/color-generator">)
-* [Value persistence](https://lemonadejs.net/docs/examples/value-persistence">)
-* [DIV onresize](https://lemonadejs.net/docs/examples/div-onresize">)
-* [Star rating](https://lemonadejs.net/docs/examples/rating">)
-* [Table](https://lemonadejs.net/docs/examples/table">)
-* [Disable elements](https://lemonadejs.net/docs/examples/enable-disable-elements">)
-* [Color picker](https://lemonadejs.net/docs/examples/color-picker">)
-* [Hangman game](https://lemonadejs.net/docs/examples/hangman">)
-* [Tic tac toe](https://lemonadejs.net/docs/examples/tic-tac-toe">)
+* [Lamp](https://lemonadejs.com/docs/examples/lamp">)
+* [Counter](https://lemonadejs.com/docs/examples/counter">)
+* [Color generator](https://lemonadejs.com/docs/examples/color-generator">)
+* [Value persistence](https://lemonadejs.com/docs/examples/value-persistence">)
+* [DIV onresize](https://lemonadejs.com/docs/examples/div-onresize">)
+* [Star rating](https://lemonadejs.com/docs/examples/rating">)
+* [Table](https://lemonadejs.com/docs/examples/table">)
+* [Disable elements](https://lemonadejs.com/docs/examples/enable-disable-elements">)
+* [Color picker](https://lemonadejs.com/docs/examples/color-picker">)
+* [Hangman game](https://lemonadejs.com/docs/examples/hangman">)
+* [Tic tac toe](https://lemonadejs.com/docs/examples/tic-tac-toe">)
 
 
 ## Other tools
