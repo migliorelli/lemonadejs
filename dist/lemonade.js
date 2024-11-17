@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v4.3.3
+ * LemonadeJS v5
  *
  * Website: https://lemonadejs.net
  * Description: Create amazing web based reusable components.
@@ -34,8 +34,967 @@
         }
     }
 
+    const state = new Set;
+    const sugar = new Map;
+    const onload = new Map;
+    const onchange = new Map;
+    const components = new Map;
+
     // Script expression inside LemonadeJS templates
     let isScript = /{{(.*?)}}/g;
+
+    /**
+     * Show a better error developers
+     */
+    const createError = function() {
+        console.error('LemonadeJS', ...arguments)
+    }
+
+    /**
+     * Extract all valid tokens from a string
+     * @param {string} content
+     * @returns {string[]}
+     */
+    function extractTokens(content) {
+        const extractAction = function(find, replace) {
+            let tokens = content.match(find);
+            if (tokens) {
+                for (let i = 0; i < tokens.length; i++) {
+                    result.add(tokens[i].replace(replace, ''));
+                }
+            }
+        }
+        let result = new Set;
+        extractAction(/self\.\w+\b(?!\.\w)/gm, /self\./)
+        extractAction(/this\.\w+\b(?!\.\w)/gm, /this\./)
+        return Array.from(result);
+    }
+
+    /**
+     * Bind a property to one action and start tracking
+     * @param {string} prop - property to be tracked
+     * @param {object} events - events to be actioned when this property is updated
+     */
+    const trackProperty = function(prop, events) {
+        // Lemon handler
+        let s = this;
+        if (typeof(s) === 'object') {
+            // Current value
+            let value = this[prop];
+            // Do not allow undefined
+            if (typeof(value) === 'undefined') {
+                value = '';
+            }
+            // Create the observer
+            Object.defineProperty(s, prop, {
+                set: function(v) {
+                    // Old value
+                    let oldValue = value;
+                    // New value
+                    value = v;
+                    // Dispatch reactions
+                    if (events) {
+                        events.forEach((action) => {
+                            action();
+                        });
+                    }
+                    // Refresh bound elements
+                    let change = onchange.get(s);
+                    if (change) {
+                        change.forEach((action) => {
+                            if (typeof(action) === 'function') {
+                                action.call(s, prop, oldValue, v);
+                            }
+                        })
+                    }
+                    // Native onchange
+                    if (typeof(s.onchange) === 'function') {
+                        s.onchange.call(s, prop, oldValue, v);
+                    }
+                },
+                get: function () {
+                    // Get value
+                    return value;
+                },
+                configurable: true,
+                enumerable: true,
+            });
+        }
+    }
+
+    /**
+     * Check if an element is appended to the DOM or a shadowRoot
+     * @param {HTMLElement} node
+     * @return {boolean}
+     */
+    const isAppended = function(node) {
+        while (node) {
+            if (node === document.body) {
+                return true; // Node is in main document
+            }
+
+            if (node.parentNode === null) {
+                if (node.host) {
+                    node = node.host; // Traverse up through ShadowRoot
+                } else {
+                    return false; // Detached node
+                }
+            } else {
+                node = node.parentNode; // Traverse up through parentNode
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Process the onload methods
+     */
+    const processOnload = function(lemon) {
+        // Check if the element is appended to the DOM
+        if (isAppended(lemon.tree.element)) {
+            // Ready event
+            let event;
+            while (lemon.ready.length) {
+                lemon.ready.shift()();
+            }
+            // Current self
+            let s = lemon.self;
+            // Onload event
+            event = onload.get(s);
+            if (event) {
+                // Remove from the queue
+                onload.delete(s);
+                // Execute onload event
+                event(s);
+            }
+            // Native onload
+            if (typeof(s.onload) === 'function') {
+                s.onload.call(s, s.el);
+            }
+        }
+    }
+
+    /**
+     * Return the element based on the type
+     * @param item
+     * @returns {*}
+     */
+    const getElement = function(item) {
+        return typeof(item.type) === 'function' ? item.self : item.element;
+    }
+
+    const nodeToXml = function(node) {
+        function buildElement(node) {
+            // Handle text nodes
+            if (node.type === '#text') {
+                return escapeXml(node.content);
+            }
+
+            // Handle element nodes
+            const attributes = node.props?.length
+                ? ' ' + node.props
+                .map(attr => `${attr.name}="${escapeXml(attr.value)}"`)
+                .join(' ')
+                : '';
+
+            // If no children, create self-closing tag
+            if (!node.children?.length) {
+                return `<${node.type}${attributes}/>`;
+            }
+
+            // Process children
+            const childrenXml = node.children
+                .map(child => buildElement(child))
+                .join('');
+
+            // Return complete element
+            return `<${node.type}${attributes}>${childrenXml}</${node.type}>`;
+        }
+
+        // Escape special XML characters
+        function escapeXml(text) {
+            if (text === undefined || text === null) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        return buildElement(node);
+    }
+
+    const getTemplate = function(item) {
+        if (item.children && item.children.length > 0) {
+            // Process each child individually and join the results
+            return item.children.map(child => nodeToXml(child)).join('');
+        }
+        return '';
+    }
+
+    const HTMLParser = function(html, values) {
+        /**
+         * Check if is a self-closing tag
+         * @param {string|function} type - Tag name or component function
+         * @returns {boolean}
+         */
+        function isSelfClosing(type) {
+            if (! type) {
+                return false;
+            } else {
+                // List of self-closing or void HTML elements
+                const selfClosingTags = [
+                    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'
+                ];
+                // Convert tagName to lowercase to ensure case-insensitive comparison
+                return typeof(type) === 'function' || selfClosingTags.includes(type.toLowerCase());
+            }
+        }
+
+        /**
+         * Create a text node and add it to current node's children
+         * @param {Object} tag - Text node properties
+         */
+        const createTextNode = function(tag) {
+            if (! this.current.children) {
+                this.current.children = [];
+            }
+
+            this.current.children.push({
+                type: '#text',
+                parent: this.current,
+                ...tag,
+            });
+        }
+
+        /**
+         * Find the parent node by tag name
+         * @param {Object} node - Current node
+         * @param {string} type - Tag name to find
+         * @returns {Object|undefined}
+         */
+        const findParentByTagName = function(node, type) {
+            if (node && type) {
+                if (node.type === type) {
+                    return node;
+                } else {
+                    return findParentByTagName(node.parent, type);
+                }
+            }
+
+            return undefined;
+        }
+
+        /**
+         * Get expression value and update tag metadata
+         * @param {Object} tag - Tag to update
+         * @returns {*} Expression value
+         */
+        const getExpression = function(tag) {
+            // Get value
+            const v = values && values[this.index] !== undefined ? values[this.index] : '';
+            // Keep the reference
+            tag.expression = this.reference;
+            // Keep the index
+            tag.index = this.index++;
+            // Delete reference
+            delete this.reference;
+            // Return value
+            return v;
+        }
+
+        /**
+         * Handle the text node creation
+         */
+        const commitText = function() {
+            if (typeof(this.text) !== 'undefined') {
+                const text = this.text.replace(/^\s*$/gm, "");
+                if (text.trim()) {
+                    createTextNode.call(this, { content: text });
+                }
+                delete this.text;
+            }
+        }
+
+        /**
+         * Save the attribute to the tag
+         */
+        const commitAttribute = function() {
+            if (this.tag.attributeName) {
+                // Commit any current attribute
+                if (! this.tag.props) {
+                    this.tag.props = [];
+                }
+
+                let k = this.tag.attributeName;
+                let v = this.tag.attributeValue;
+
+                if (typeof(v) === 'undefined') {
+                    v = k;
+                }
+
+                let tag = {
+                    name: k,
+                    value: v,
+                };
+
+                if (typeof(this.tag.expression) !== 'undefined') {
+                    tag.index = this.tag.index;
+                    tag.expression = this.tag.expression;
+                }
+
+                this.tag.props.push(tag);
+
+                // Clean up temporary properties
+                delete this.tag.attributeName;
+                delete this.tag.attributeValue;
+                delete this.tag.index;
+                delete this.tag.expression;
+
+                if (this.tag.attributeIsReadyToClose) {
+                    delete this.tag.attributeIsReadyToClose;
+                }
+            }
+        }
+
+        /**
+         * Actions controller
+         * @param {Object} control - Parser control object
+         * @param {string} char - Current character
+         */
+        const actions = function(control, char) {
+            const method = control.action || 'text';
+            if (typeof actions[method] === 'function') {
+                actions[method].call(control, char);
+            }
+        }
+
+        /**
+         * Process a new tag
+         * @param char
+         */
+        actions.processTag = function(char) {
+            // Just to check if there are any text to commit
+            commitText.call(this);
+
+            // Process the tag
+            if (char === '<') {
+                // Create new tag
+                this.tag = {
+                    type: '',
+                    parent: this.current
+                };
+            } else if (char.match(/[a-zA-Z0-9-]/)) {
+                // Tag name
+                this.tag.type += char;
+            } else {
+                if (char === '$' && this.reference) {
+                    // Custom tags
+                    this.tag.type = getExpression.call(this, this.tag);
+                }
+                // Finished with tag name, move to attribute handling
+                this.action = 'attributeName';
+            }
+        }
+
+        /**
+         * Handle tag closing
+         * @param char
+         */
+        actions.closeTag = function(char) {
+            // Make sure to commit attribute
+            commitAttribute.call(this);
+            // Close the tag
+            if (char === '>') {
+                // Get the new parent
+                if (isSelfClosing(this.tag.type)) {
+                    // Push new tag to the parent
+                    if (! this.tag.parent.children) {
+                        this.tag.parent.children = [];
+                    }
+                    this.tag.parent.children.push(this.tag);
+                } else if (this.tag.closingTag) {
+                    // Need to find the parent on the chain
+                    const parentNode = findParentByTagName(this.tag.parent, this.tag.type);
+                    if (parentNode) {
+                        this.current = parentNode.parent;
+                    }
+                } else {
+                    if (this.tag.closing) {
+                        // Current is the parent
+                        this.current = this.tag.parent;
+                    } else {
+                        this.current = this.tag;
+                    }
+
+                    // Push new tag to the parent
+                    if (! this.tag.parent.children) {
+                        this.tag.parent.children = [];
+                    }
+                    this.tag.parent.children.push(this.tag);
+                }
+
+                // Remote temporary properties
+                delete this.tag.insideQuote;
+                delete this.tag.closingTag;
+                delete this.tag.closing;
+                // Finalize tag
+                this.tag = null;
+                // New action
+                this.action = 'text';
+            } else if (! this.tag.locked) {
+                if (char === '/') {
+                    if (! this.tag.type) {
+                        // This is a closing tag
+                        this.tag.closingTag = true;
+                    }
+                    // Closing character is found
+                    this.tag.closing = true;
+                } else if (char.match(/[a-zA-Z0-9-]/)) {
+                    // If is a closing tag, get the tag name
+                    if (this.tag.closingTag) {
+                        this.tag.type += char;
+                    }
+                } else {
+                    // Wait to the closing sign
+                    if (this.tag.type) {
+                        this.locked = true;
+                    }
+                }
+            }
+        }
+
+        actions.attributeName = function(char) {
+            // There is another attribute to commit
+            if (this.tag.attributeIsReadyToClose) {
+                commitAttribute.call(this);
+            }
+
+            // Build attribute name
+            if (char.match(/[a-zA-Z0-9-:]/)) {
+                if (! this.tag.attributeName) {
+                    this.tag.attributeName = '';
+                }
+                this.tag.attributeName += char;
+            } else if (char === '=') {
+                // Move to attribute value
+                if (this.tag.attributeName) {
+                    this.action = 'attributeValue';
+                    delete this.tag.attributeIsReadyToClose;
+                }
+            } else if (char.match(/\s/)) {
+                this.tag.attributeIsReadyToClose = true;
+            }
+        };
+
+        actions.attributeValue = function(char) {
+            if (! this.tag.attributeValue) {
+                this.tag.attributeValue = '';
+            }
+
+            if (char === '"' || char === "'") {
+                if (this.tag.insideQuote) {
+                    if (this.tag.insideQuote === char) {
+                        this.tag.insideQuote = false;
+                    } else {
+                        this.tag.attributeValue += char;
+                    }
+                } else {
+                    this.tag.insideQuote = char;
+                }
+            } else {
+                if (char === '$' && this.reference) {
+                    // Custom tags
+                    char = getExpression.call(this, this.tag);
+                }
+                // Inside quotes, keep appending to the attribute value
+                if (this.tag.insideQuote) {
+                    if (this.tag.attributeValue) {
+                        this.tag.attributeValue += char;
+                    } else {
+                        this.tag.attributeValue = char;
+                    }
+                } else if (char.match(/\s/)) {
+                    if (this.tag.attributeValue) {
+                        this.action = 'attributeName';
+                    }
+                    this.tag.attributeIsReadyToClose = true;
+                } else {
+                    if (this.tag.attributeIsReadyToClose) {
+                        this.action = 'attributeName';
+                        actions.attributeName.call(this, char);
+                    } else {
+                        this.tag.attributeValue += char;
+                    }
+                }
+            }
+        }
+
+        actions.text = function(char) {
+            if (char === '$' && this.reference) {
+                // Just to check if there are any text to commit
+                commitText.call(this);
+                // Custom tags
+                let tag = {}
+                tag.content = getExpression.call(this, tag);
+                // Add node tag
+                createTextNode.call(this, tag);
+            } else {
+                if (referenceControl === 1) {
+                    // Just to check if there are any text to commit
+                    commitText.call(this);
+                }
+
+                // Normal text processing
+                if (! this.text) {
+                    this.text = '';
+                }
+                this.text += char; // Keep appending to text content
+
+                if (referenceControl === 2) {
+                    // Just to check if there are any text to commit
+                    commitText.call(this);
+                }
+            }
+        };
+
+        // Control the LemonadeJS native references
+        let referenceControl = null;
+
+        const result = { type: 'root' };
+        const control = {
+            current: result,
+            action: 'text',
+            index: 0,
+        };
+
+        // Input validation
+        if (typeof html !== 'string') {
+            throw new TypeError('HTML input must be a string');
+        }
+
+        // Main loop to process the HTML string
+        for (let i = 0; i < html.length; i++) {
+            // Current char
+            const char = html[i];
+
+            // Global control logic
+            if (control.tag) {
+                if (char === '>' || char === '/') {
+                    // End of tag, commit any attributes and go back to text parsing
+                    if (! control.tag.insideQuote) {
+                        control.action = 'closeTag';
+                    }
+                }
+            } else {
+                if (char === '<') {
+                    control.action = 'processTag';
+                }
+            }
+
+            // Control references
+            if (char === '$' && html[i+1] === '{') {
+                // Get the content of the reference
+                let text = '';
+                // Skip $ and {
+                i += 2;
+                // Next char
+                do {
+                    // Save reference
+                    text += html[i];
+                    // Next char
+                    i++;
+                } while (i < html.length && html[i] !== '}');
+                // Content of the reference
+                control.reference = text;
+            }
+
+            // Control node references
+            if (char === '{' && html[i+1] === '{') {
+                referenceControl = 1;
+            } else if (char === '}' && html[i-1] === '}') {
+                referenceControl = 2;
+            }
+
+            // Execute action
+            actions(control, char);
+
+            // Reference control
+            referenceControl = null;
+        }
+
+        // Handle any remaining text
+        commitText.call(control);
+
+        return result.children && result.children[0];
+    }
+
+    const generateHTML = function(lemon) {
+
+        const appendEvent = function(token, event, exec) {
+            if (! lemon.events[token]) {
+                lemon.events[token] = []
+            }
+            // Push the event
+            lemon.events[token].push(event);
+            // Execute
+            if (exec) {
+                event();
+            }
+        }
+
+        const createEventsFromExpression = function(expression, event, exec) {
+            // Get the tokens should be updated to populate this attribute
+            let tokens = extractTokens(expression);
+            if (tokens.length) {
+                // Process all the tokens
+                for (let i = 0; i < tokens.length; i++) {
+                    appendEvent(tokens[i], event);
+                }
+            }
+            // Execute method
+            if (exec === true) {
+                event();
+            }
+        }
+
+        const setDynamicValue = function(item, token, attributeName) {
+            // Event
+            let applyValueEvent = function() {
+                // Set attribute
+                setAttribute(getElement(item), attributeName, lemon.self[token]);
+            }
+            // Append event
+            appendEvent(token, applyValueEvent, true);
+        }
+
+        const extractDynamicValueFromTemplate = function(item, prop) {
+            createEventsFromExpression(prop.expression, function() {
+                // Extra the value from the template
+                let value = lemon.view(parseTemplate)[prop.index];
+                // Set attribute
+                setAttribute(getElement(item), prop.name, value);
+            }, true);
+        }
+
+        const dynamicContent = function(text) {
+            try {
+                // Cast value
+                let cast = null;
+                // Replace the text
+                text = text.replace(isScript, function (a, b) {
+                    let s = lemon.self;
+                    // Try to find the property
+                    let result = extractFromPath.call(s, b);
+                    // Evaluation for legacy purposes
+                    if (typeof (result) === 'undefined') {
+                        // This is deprecated and will be drop on LemonadeJS 6
+                        result = run.call(s, b);
+                        if (typeof (result) === 'undefined') {
+                            result = '';
+                        }
+                    }
+                    // Parse correct type
+                    if (typeof(result) !== 'string' && a === text) {
+                        cast = result;
+                    }
+                    // Return
+                    return result;
+                });
+
+                if (cast !== null) {
+                    return cast;
+                }
+
+                return text;
+            } catch (e) {
+                createError('It was not possible to parse ', text)
+            }
+        }
+
+        const applyNodeContent = function(item) {
+            if (item.expression) {
+                // Bind method to all tokens
+                createEventsFromExpression(item.expression, function() {
+                    // Get the value from token
+                    item.element.textContent = lemon.view(parseTemplate)[item.index];
+                });
+            } else {
+                createEventsFromExpression(item.content, function() {
+                    // Dynamic text
+                    item.element.textContent = dynamicContent(item.content);
+                }, true)
+           }
+        }
+
+        const applyElementAttribute = function(item, prop) {
+            if (typeof(prop.expression) !== 'undefined') {
+                extractDynamicValueFromTemplate(item, prop);
+            } else {
+                // Get the tokens should be updated to populate this attribute
+                let tokens = extractTokens(prop.value);
+                if (tokens.length) {
+                    // Dynamic
+                    createEventsFromExpression(prop.value, function() {
+                        // Dynamic text
+                        let value = dynamicContent(prop.value);
+                        // Get the dynamic value
+                        setAttribute(getElement(item), prop.name, value);
+                    }, true)
+                } else {
+                    // Regular
+                    if (typeof(item.type) === 'function') {
+                        item.self[prop.name] = prop.value;
+                    } else {
+                        item.element.setAttribute(prop.name, prop.value);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Create a LemonadeJS self reference
+         * @param item
+         * @param prop
+         */
+        const createReference = function(item, prop) {
+            if (typeof(item.type) === 'function') {
+                // Reference to the self o the LemonadeJS component
+                lemon.self[prop] = item.self;
+            } else {
+                // Reference to the DOM element
+                lemon.self[prop] = item.element;
+            }
+        }
+
+        /**
+         * Create a LemonadeJS self bind
+         * @param item
+         * @param prop
+         */
+        const applyBindHandler = function(item, prop) {
+            // Bind property
+            item.bind = true;
+
+            // Event from component to the property
+            let event = function() {
+                let value = getAttribute(getElement(item), 'value');
+                if (lemon.self[prop] !== value) {
+                    lemon.self[prop] = value;
+                }
+            }
+
+            if (typeof(item.type) === 'function') {
+                L.onchange(item.self, event);
+            } else {
+                item.element.addEventListener('input', event);
+            }
+
+            // Event property to the element
+            event = () => {
+                setAttribute(getElement(item), 'value', lemon.self[prop]);
+            }
+            // Append event
+            appendEvent(prop, event, true);
+        }
+
+        /**
+         * Process the :ready. Call when DOM is ready
+         * @param item
+         * @param prop
+         */
+        const whenIsReady = function(item, prop) {
+            // When is ready
+            const method = lemon.self[prop];
+            // Must be a function
+            if (typeof(method) === 'function') {
+                lemon.ready.push(function() {
+                    method(getElement(item), lemon.self);
+                });
+            } else {
+                createError(`:ready [${prop}] is not found in the object or it is not a function`)
+            }
+        }
+
+        const registerLoop = function(item, prop) {
+            // Register a loop item
+            item.loop = true;
+            // Get template
+            item.template = getTemplate(item);
+            // Event
+            let event = function() {
+                // Component
+                let method = typeof(item.type) === 'function' ? item.type : Basic;
+                // Root element
+                let root = item.element;
+                if (typeof(root) === 'undefined') {
+                    root = item.parent.element;
+                }
+                // Elements
+                let items = [];
+                // Get the data
+                const data = lemon.self[prop];
+                // Process the data
+                if (data && Array.isArray(data)) {
+                    // Process data
+                    data.forEach(function(self) {
+                        if (! self.el) {
+                            // Register parent
+                            register(self, 'parent', lemon.self);
+                            // Render
+                            L.render(method, null, self, item);
+                        }
+                        items.push(self.el);
+                    })
+                }
+
+                // Remove all DOM
+                while (root.firstChild) {
+                    root.firstChild.remove();
+                }
+                // Insert elements to the DOM
+                while (items.length) {
+                    root.appendChild(items.shift());
+                }
+            }
+            // Append event
+            appendEvent(prop, event, true);
+
+        }
+
+        const appendChildren = function(container, children) {
+            if (children) {
+                children.forEach(child => {
+                    if (typeof(child) === 'string') {
+                        container.appendChild(document.createTextNode(child));
+                    } else if (child.element) {
+                        container.appendChild(child.element);
+                    }
+                });
+            }
+        }
+
+        const createElements = function(item) {
+            if (typeof(item) === 'object') {
+                // Create element
+                if (item.type === '#text') {
+                    // Text node
+                    item.element = document.createTextNode(item.content || '');
+                    // Check for dynamic content
+                    applyNodeContent(item);
+                } else {
+                    // Create all children
+                    if (item.children) {
+                        item.children.forEach(child => {
+                            createElements(child);
+                        });
+                    }
+
+                    if (! item.type) {
+                        item.type = 'root';
+                    } else if (typeof(item.type) === 'string') {
+                        if (item.type.match(/^[A-Z][a-zA-Z0-9\-]*$/g)) {
+                            let controller = item.type.toUpperCase();
+                            if (typeof (R.components[controller]) === 'function') {
+                                item.type = R.components[controller];
+                            }
+                        }
+                    }
+
+                    // Create the element for the current tag
+                    if (typeof(item.type) === 'string') {
+                        item.element = document.createElement(item.type);
+                    } else if (typeof(item.type) === 'function') {
+                        item.self = {};
+                    }
+
+                    // Apply attributes if they exist
+                    if (item.props) {
+                        if (! Array.isArray(item.props)) {
+                            let props = [];
+                            let keys = Object.keys(item.props);
+                            for (let i = 0; i < keys.length; i++) {
+                                props.push({ name: keys[i], value: item.props[keys[i]] });
+                            }
+                            item.props = props;
+                        }
+
+                        if (item.props.length) {
+                            item.props.forEach(function(prop) {
+                                if (item.element && prop.name.startsWith('on')) {
+                                    let method = prop.value;
+                                    let event = prop.name.substring(2);
+                                    item.element.addEventListener(event, method)
+                                } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
+                                    // Create a reference to the DOM element
+                                    let property = prop.expression || prop.value;
+                                    // Get the attribute name
+                                    property = extractTokens(property);
+                                    // Reference name is found
+                                    if (property.length === 1) {
+                                        // Whe need the entry
+                                        property = property[0];
+                                        // Special lemonade attribute name
+                                        let attributeName = prop.name[0] === ':' ? prop.name.substring(1) : prop.name.substring(3);
+                                        // Is that a special event
+                                        if (attributeName === 'ref') {
+                                            createReference(item, property)
+                                        } else if (attributeName === 'bind') {
+                                            applyBindHandler(item, property);
+                                        } else if (attributeName === 'ready') {
+                                            whenIsReady(item, property);
+                                        } else if (attributeName === 'loop') {
+                                            registerLoop(item, property);
+                                        } else {
+                                            setDynamicValue(item, property, attributeName);
+                                        }
+                                    }
+                                } else {
+                                    applyElementAttribute(item, prop);
+                                }
+                            })
+                        }
+                    }
+
+                    // Do not create elements at this state if this is a loop
+                    if (! item.loop) {
+                        if (typeof (item.type) === 'function') {
+                            // Create DOM tree
+                            item.template = getTemplate(item);
+                            // Execute component
+                            item.element = L.render(item.type, null, item.self, item);
+                            // Register
+                            if (! L.strict) {
+                                register(item.self, 'parent', lemon.self);
+                            }
+                        }
+
+                        // Create all children
+                        if (item.children) {
+                            appendChildren(item.element, item.children);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create DOM elements
+        createElements(lemon.tree);
+
+        // Apply events
+        if (lemon.events) {
+            let props = Object.keys(lemon.events);
+            if (props.length) {
+                for (let i = 0; i <props.length; i++) {
+                    let prop = props[i];
+                    trackProperty.call(lemon.self, prop, lemon.events[prop]);
+                }
+            }
+        }
+
+        return lemon.tree.element;
+    }
 
     /**
      * Extract a property from a nested object using a string address
@@ -45,7 +1004,7 @@
     const extractFromPath = function(str, config) {
         try {
             let t = str.toString().replace(/[\[\]]/g, '.').split('.');
-            if (t[0] === 'self') {
+            if (t[0] === 'self' || t[0] === 'this') {
                 t.shift();
             }
             // Remove blanks
@@ -83,54 +1042,11 @@
     }
 
     /**
-     * Cast the value of an attribute
-     */
-    const castProperty = function(attr) {
-        // Parse type
-        try {
-            if (typeof(attr) === 'string' && attr) {
-                // Remove any white spaces
-                attr = attr.trim();
-                if (attr === 'true') {
-                    return true;
-                } else if (attr === 'false') {
-                    return false;
-                } else if (! isNaN(attr)) {
-                    return Number(attr);
-                } else if (attr.substring(0, 1) === '{' || attr.substring(0, 1) === '[') {
-                    if (attr.slice(-1) === '}' || attr.slice(-1) === ']') {
-                        return JSON.parse(attr);
-                    }
-                } else if (attr.substring(0, 5) === 'self.') {
-                    let v = extractFromPath.call(this, attr);
-                    if (typeof(v) !== 'undefined') {
-                        return v;
-                    }
-                }
-            }
-        } catch (e) {}
-
-        return attr;
-    }
-
-    /**
      * This allows to run inline script on legacy system. Inline script can lead to security issues so use carefully.
      * @param {string} s string to function
      */
     const run = function(s) {
         return Function('self', '"use strict";return (' + s + ')')(this);
-    }
-
-    /**
-     * Create a new HTML element
-     * @param {string} type - create a new HTML element as a type
-     * @param {string} html - initial content
-     * @return {HTMLElement} e - new HTML element
-     */
-    const create = function(type, html) {
-        let e = document.createElement(type);
-        e.innerHTML = html;
-        return e;
     }
 
     /**
@@ -157,151 +1073,99 @@
      * @return {HTMLElement}
      */
     const Basic = function(t) {
-        return L.element(t, this);
-    }
-
-    /**
-     * Execute pending tasks and remove from queue
-     * @param {string} type - task type
-     * @param {function} f - task
-     * @return {HTMLElement}
-     */
-    const unqueue = function(type, f) {
-        let q = null;
-        for (let i = 0; i < R.queue.length; i++) {
-            q = R.queue[i];
-            if (q.type === type) {
-                // Reset item in the queue
-                R.queue[i] = {};
-                // Execute method
-                f(q);
-            }
-        }
-    }
-
-    /**
-     * Check if a element is appended to the DOM or a shadowRoot
-     * @param {HTMLElement} node
-     * @return {boolean}
-     */
-    const contains = function(node) {
-        while (node) {
-            if (node === document.body) {
-                return true; // Node is in main document
-            }
-
-            if (node.parentNode === null) {
-                if (node.host) {
-                    node = node.host; // Traverse up through ShadowRoot
-                } else {
-                    return false; // Detached node
-                }
-            } else {
-                node = node.parentNode; // Traverse up through parentNode
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Process all methods queued from the ready property
-     * @param {HTMLElement} e - check if the element is already in the DOM
-     */
-    const queue = function(e) {
-        // Un-queue
-        if (contains(e)) {
-            // Process ready elements
-            unqueue('ready', function(q) {
-                q.method();
-            });
-            // Process ready elements
-            unqueue('onload', function(q) {
-                q.method();
-            });
-            // Reset anything left in the queue
-            R.queue = [];
-        }
+        return t;
     }
 
     /**
      * Get the attribute helper
-     * @param {object} e - element
+     * @param {object} e Element
+     * @param {string} attribute
      */
-    const getAttribute = function(e) {
-        // Final value
-        let v;
-        if (typeof(e.val) === 'function') {
-            v = e.val();
-        } else {
-            if (e.tagName === 'SELECT' && e.getAttribute('multiple')) {
-                v = [];
-                for (let i = 0; i < e.options.length; i++) {
-                    if (e.options[i].selected) {
-                        v.push(e.options[i].value);
-                    }
-                }
-            } else if (e.type === 'checkbox') {
-                v = e.checked && e.getAttribute('value') ? e.value : e.checked;
-            } else if (e.getAttribute('contenteditable')) {
-                v = e.innerHTML;
+    const getAttribute = function(e, attribute) {
+        let value;
+        if (attribute === 'value') {
+            if (typeof(e.val) === 'function') {
+                value = e.val();
             } else {
-                v = e.value;
+                if (e.getAttribute) {
+                    if (e.tagName === 'SELECT' && e.getAttribute('multiple')) {
+                        value = [];
+                        for (let i = 0; i < e.options.length; i++) {
+                            if (e.options[i].selected) {
+                                value.push(e.options[i].value);
+                            }
+                        }
+                    } else if (e.type === 'checkbox') {
+                        value = e.checked && e.getAttribute('value') ? e.value : e.checked;
+                    } else if (e.getAttribute('contenteditable')) {
+                        value = e.innerHTML;
+                    } else {
+                        value = e.value;
+                    }
+                } else {
+                    value = e.value;
+                }
             }
         }
-        return v;
+        return value;
     }
 
     /**
      * Set attribute value helper
+     * @param {object} e Element
+     * @param {string} attribute
+     * @param {any} value
      */
-    const setAttribute = function(e, v, t) {
-        if (t === 'value') {
+    const setAttribute = function(e, attribute, value) {
+        // When the value is a function
+        if (isDOM(e) && typeof(value) === 'function') {
+            value = value();
+        }
+
+        if (attribute === 'value') {
             // Update HTML form element
             if (typeof(e.val) === 'function') {
-                if (e.val() != v) {
-                    e.val(v);
+                if (e.val() != value) {
+                    e.val(value);
                 }
             } else if (e.tagName === 'SELECT' && e.getAttribute('multiple')) {
                 for (let j = 0; j < e.children.length; j++) {
-                    e.children[j].selected = v.indexOf(e.children[j].value) >= 0;
+                    e.children[j].selected = value.indexOf(e.children[j].value) >= 0;
                 }
             } else if (e.type === 'checkbox') {
-                e.checked = ! (! v || v === '0' || v === 'false');
+                e.checked = ! (! value || value === '0' || value === 'false');
             } else if (e.type === 'radio') {
                 e.checked = false;
-                if (e.value == v) {
+                if (e.value == value) {
                     e.checked = true;
                 }
             } else if (e.getAttribute && e.getAttribute('contenteditable')) {
-                if (e.innerHTML != v) {
-                    e.innerHTML = v;
+                if (e.innerHTML != value) {
+                    e.innerHTML = value;
                 }
             } else {
                 // Make sure apply that to the value
-                e.value = v;
+                e.value = value;
                 // Update attribute if exists
                 if (e.getAttribute && e.getAttribute('value') !== null) {
-                    e.setAttribute('value', v);
+                    e.setAttribute('value', value);
                 }
             }
-        } else if (t === 'src') {
-            if (! v) {
-                v = e.getAttribute('default');
+        } else if (attribute === 'src') {
+            if (value) {
+                e.setAttribute(attribute, value);
             }
-            if (v) {
-                e.setAttribute(t, v);
-            }
-        } else if (typeof(e[t]) !== 'undefined' || typeof(v) == 'function' || typeof(v) == 'object') {
-            e[t] = v;
+        } else if (typeof(e[attribute]) !== 'undefined' || typeof(value) == 'object') {
+            e[attribute] = value;
         } else {
             if (isDOM(e)) {
-                if (v === '') {
-                    e.removeAttribute(t);
+                if (value === '') {
+                    e.removeAttribute(attribute);
                 } else {
-                    e.setAttribute(t, v);
+                    e.setAttribute(attribute, value);
                 }
             } else {
-                e[t] = v;
+                e[attribute] = value;
             }
         }
     }
@@ -329,145 +1193,6 @@
     }
 
     /**
-     * Run a loop in the data for the element {e}
-     * @param {object} o - tracking content object
-     */
-    const loop = function(o) {
-        let data = extractFromPath.call(o.s, o.v);
-        if (data) {
-            // Template for the render
-            let t;
-            // Method handler for custom elements
-            let m;
-            // Contains all new elements
-            let d = [];
-            // If data exists render each element of the array
-            if (data.length) {
-                for (let i = 0; i < data.length; i++) {
-                    let e = data[i].el;
-                    if (! e) {
-                        t = o.e.lemonade;
-                        m = t.handler || Basic;
-                        // Create reference to the element
-                        register(data[i], 'parent', o.s);
-                        // Create element
-                        e = L.render(m, o.r, data[i], t.template);
-                    }
-                    if (o.e.getAttribute('unique') === 'false') {
-                        register(data[i], 'el', null);
-                    }
-                    d.push(e);
-                }
-            }
-            // TODO: try to improve this process
-
-            // Remove all DOM
-            while (o.r.firstChild) {
-                o.r.firstChild.remove();
-            }
-            // Insert necessary DOM
-            while (t = d.shift()) {
-                o.r.appendChild(t);
-            }
-        }
-    }
-
-    /**
-     * Process the value of a content object
-     * @param {object} o - tracking content object
-     */
-    const process = function(o) {
-        // Attribute
-        let a;
-        if (o.bind) {
-            a = 'value';
-        } else {
-            a = o.a;
-        }
-        // Value
-        if (o.loop) {
-            loop(o);
-        } else {
-            let v;
-            // Verify if the value is a reference or a string
-            if (o.reference) {
-                v = castProperty.call(o.s, o.v);
-            } else {
-                let cast = false;
-                let result;
-                // Replace string
-                v = o.v.replace(isScript, function(a, b) {
-                    // Try to find the property
-                    result = extractFromPath.call(o.s, b);
-                    // If that is a function execute and get the return
-                    if (typeof(result) === 'function') {
-                        result = result.call(o.s, o.e, a);
-                    } else {
-                        if (typeof(result) === 'undefined') {
-                            result = run.call(o.s, b);
-                            if (typeof(result) === 'undefined') {
-                                result = '';
-                            }
-                        }
-                    }
-                    // Parse correct type
-                    if (typeof(result) !== 'string' && a === o.v) {
-                        cast = true;
-                    }
-                    // Return
-                    return result;
-                });
-                if (cast === true) {
-                    v = result;
-                }
-            }
-
-            if (o.e.lemonade) {
-                o.e.lemonade.self[a] = v;
-            }
-
-            if (o.protect) {
-                // Protect from loop
-                if (o.e[a] === v) {
-                    return;
-                }
-            }
-
-            if (o.reference) {
-                o.e[a] = v;
-            } else {
-                setAttribute(o.e, v, a);
-            }
-        }
-    }
-
-    /**
-     * Dispatch all updates for a property from the self
-     * @param {string} property - property from the self
-     * @param {any} oldValue property value
-     * @param {any} newValue property value
-     */
-    const dispatch = function(property, oldValue, newValue) {
-        // Tracking object
-        let o = R.tracking.get(this);
-        if (o) {
-            o = o[property];
-            if (o) {
-                // Process all registered elements
-                for (let i = 0; i < o.length; i++) {
-                    // Element to be updated
-                    process(o[i]);
-                }
-            }
-
-            // A property has changed
-            if (typeof(this.onchange) === 'function') {
-                this.onchange(property, o, this, oldValue, newValue);
-            }
-        }
-    }
-
-    /**
      * Register a getter without setter for a self object
      * @param {object} s - self object
      * @param {string} p - self property
@@ -486,377 +1211,15 @@
     }
 
     /**
-     * Bind an property to one action and start tracking
-     * @param {string} p - property to be tracked
-     */
-    const observers = function(p) {
-        // Lemon handler
-        let s = this;
-        if (typeof(s) === 'object') {
-            let value = this[p];
-            // Do not allow undefined
-            if (typeof (value) === 'undefined') {
-                value = '';
-            }
-            // Create the observer
-            Object.defineProperty(s, p, {
-                set: function (v) {
-                    // Old value
-                    let oldValue = value;
-                    // New value
-                    value = v;
-                    // Refresh bound elements
-                    dispatch.call(this, p, oldValue, v);
-                },
-                get: function () {
-                    // Get value
-                    return value;
-                },
-                configurable: true,
-                enumerable: true,
-            });
-        }
-    }
-
-    /**
-     * Parse the tokens from a content object to start tracking the self
-     * @param {object} content - content tracking object
-     */
-    const parseTokens = function(content) {
-        // Get all self tokens in use
-        if (typeof(content.v) === 'string') {
-            let tokens = content.v.match(/self(\.\w+|\[\d+\])*/gm);
-            if (tokens) {
-                for (let i = 0; i < tokens.length; i++) {
-                    // Get path to the object
-                    let p = extractFromPath.call(this, tokens[i], true);
-                    if (p) {
-                        // Register
-                        let t = R.tracking.get(p[0]);
-                        if (!t) {
-                            t = {};
-                            R.tracking.set(p[0], t);
-                        }
-                        // Register the properties of the self
-                        if (! t[p[1]]) {
-                            t[p[1]] = [];
-                        }
-                        // Save relationship between the self and the tag attributes. TODO: avoid double call when {{self.value*self.value}}
-                        t[p[1]].push(content);
-                        // Create the necessary observers for this property
-                        observers.call(p[0], p[1]);
-                    }
-                }
-            }
-        }
-
-        // Render the value from the element attribute
-        process(content);
-    }
-
-    /**
-     * Parse the content object to see if is necessary to start tracking
-     * @param {object} content the tracking object
-     */
-    const parseExpression = function(content) {
-        // Check if the content has script marks {{}}
-        if (typeof(content.v) === 'string') {
-            if (content.v.match(isScript)) {
-                // Get all self tokens in use
-                parseTokens.call(this, content);
-            }
-        }
-    }
-
-    /**
-     * Read a attribute from an element to see if there is any script associated
-     * @param {HTMLElement} e
-     * @param {string} name - attribute name
-     * @param {string|number?} value - value to be attributed
-     */
-    const parseAttribute = function(e, name, value) {
-        // Get the content of the property
-        if (typeof(value) === 'undefined') {
-            value = e.getAttribute(name).trim();
-        }
-        // Parse expression
-        parseExpression.call(this, { e: e, a: name, v: value, s: this });
-    }
-
-    /**
-     * Read a textContent from an element to see if there is any script associated
-     * @param {HTMLElement} e - element
-     * @param {array} components
-     */
-    const parseContent = function(e, components) {
-        // Get the content of the property
-        let text = e.textContent;
-        // Check if the content has script marks {{}}
-        if (text.match(isScript)) {
-            // Replace the entries
-            let result = text.split(/({{.*?}})/g);
-            // Reset element
-            e.textContent = '';
-            // Recreate content
-            for (let j = 0; j < result.length; j++) {
-                // Text node
-                text = result[j];
-                // Injected values
-                if (text && components && components.__REF) {
-                    let r = text.match(/__lm=(\d+)/);
-                    if (r && r[1]) {
-                        text = components.__REF[r[1]].v;
-                    }
-                }
-                // Create text node
-                let node = document.createTextNode(text);
-                // Append text node back to the element
-                e.appendChild(node);
-                // Parse expression
-                parseExpression.call(this, { e: node, a: 'textContent', v: text, s: this })
-            }
-        }
-    }
-
-    /**
-     * Parse all attributes from one element
-     * @param {HTMLElement} element
-     * @param {object} components
-     */
-    const parse = function(element, components) {
-        // Self for this parser
-        let self = this;
-        // Helpers
-        let t;
-        // Get attributes from the element
-        let attr = getAttributes.call(element);
-        /** @type {function|null} */
-        let handler = null;
-        // Custom elements
-        let m = element.tagName;
-        // Expected function
-        if (components) {
-            t = components[m];
-        }
-        if (! t) {
-            t = R.components[m];
-        }
-        // Verify scope in the declared extensions
-        if (typeof(t) == 'function') {
-            handler = t;
-        }
-
-        // A custom handler is conflicting with a VALID tag name
-        if (t) {
-            if (element instanceof HTMLUnknownElement) {
-                if (! handler && m !== 'ROOT') {
-                    console.error(m + ' is not found.');
-                }
-            } else {
-                console.log(m + ' conflicts with a valid tag name');
-            }
-        }
-
-        // Is this a loop?
-        let isLoop = attr[':loop'] || attr['@loop'];
-
-        // Special cases where the content is actually the template
-        if (handler || isLoop) {
-            // Create the lemonade element controller
-            let s = {};
-            if (handler && isClass(handler)) {
-                s = new handler(s);
-            }
-            element.lemonade = {
-                self: s,
-                handler: handler,
-                template: element.innerHTML,
-                loop: isLoop,
-            };
-
-            // Reset content
-            element.innerHTML = '';
-        }
-
-        // Keys
-        let k = Object.keys(attr);
-        if (k.length) {
-            for (let i = 0; i < k.length; i++) {
-                let value = attr[k[i]];
-                if (components && components.__REF) {
-                    // Check for reference replace requirement
-                    let r = value.match(/{{__lm=(\d+)}}/);
-                    if (r && r[1]) {
-                        // Overwrite value
-                        value = components.__REF[r[1]].v;
-                    }
-                }
-
-                // Create input event to monitor changes in the HTML element
-                let prop = attr[k[i]].replace('self.', '');
-
-                // Parse events
-                if (k[i].substring(0,2) === 'on') {
-                    if (handler) {
-                        // Parse attributes
-                        parseTokens.call(self, { e: element, a: k[i], v: value, s: self, reference: true })
-                    } else {
-                        // Remove any inline javascript from the template
-                        element.removeAttribute(k[i]);
-                        element.addEventListener(k[i].substring(2), (e) => {
-                            // If not a method, should be converted to a method
-                            if (typeof (value) !== 'function') {
-                                let t = extractFromPath.call(self, prop);
-                                if (t) {
-                                    value = t;
-                                }
-                            }
-                            if (typeof (value) === 'function') {
-                                value.call(element, e, self);
-                            } else {
-                                Function('self', 'e', value).call(element, self, e);
-                            }
-                        });
-                    }
-                } else {
-                    // Check for special properties
-                    let first = k[i].substr(0,1);
-                    if (first === '@' || first === ':') {
-                        // Type
-                        let type = k[i].substr(1);
-                        // Process
-                        let q = { type };
-                        // Process types
-                        if (type === 'ready') {
-                            // If not a method, should be converted to a method
-                            if (typeof(value) !== 'function') {
-                                let t = extractFromPath.call(self, prop);
-                                if (t) {
-                                    value = t;
-                                }
-                            }
-                            if (typeof(value) === 'function') {
-                                q.method = value.bind(element, element, self);
-                            } else {
-                                q.method = Function('self', value).bind(element, self);
-                            }
-                        } else if (type === 'ref') {
-                            // Create a reference to the HTML element or to the self of the custom element
-                            self[prop] = element.lemonade && element.lemonade.handler ? element.lemonade.self : element;
-                        } else if (type === 'bind') {
-                            // Register the value attribute to be tracked
-                            parseTokens.call(self, { e: element, a: prop, v: '{{' + value + '}}', s: self, bind: true })
-
-                            // Register the value attribute to be tracked in the parent
-                            if (handler) {
-                                let s = element.lemonade.self;
-                                parseTokens.call(s, { e: self, a: prop, v: '{{self.value}}', s: s, protect: true });
-                            } else {
-                                // Add event oninput for the two-way binding
-                                let h = function() {
-                                    // Get the reference to the object
-                                    let o = extractFromPath.call(self, prop, true);
-                                    // Apply the new value
-                                    (o[0])[o[1]] = getAttribute(this);
-                                }
-                                // This will be implemented soon with jSuites 5
-                                //element.addEventListener('input', h);
-                                // Deprecated. Legacy purpose only
-                                element.oninput = h;
-                            }
-                            // Deprecated. Legacy purpose only
-                            element[k[i]] = prop;
-                        } else if (type === 'loop') {
-                            let r = element;
-                            if (element.lemonade.handler) {
-                                r = element.parentNode
-                            }
-                            // Register the value attribute to be tracked
-                            parseTokens.call(self, { e: element, a: prop, v: value, s: self, r: r, loop: true })
-                        } else {
-                            // Parse attributes
-                            parseTokens.call(self, { e: element, a: type, v: value, s: self, reference: true })
-                        }
-
-                        // Sent to the queue
-                        R.queue.push(q);
-                        // Remove special attribute from the tag
-                        element.removeAttribute(k[i]);
-                    } else {
-                        if (attr[k[i]] !== value) {
-                            if (typeof(value) === 'function' || typeof(value) === 'object') {
-                                // Do not make sense to set a function or object to a HTML attribute
-                                element[k[i]] = value;
-                                // Make sure the HTML is blank
-                                element.removeAttribute(k[i]);
-                            } else {
-                                // Make sure the HTML matches the value
-                                element.setAttribute(k[i], value);
-                                // Parse attributes
-                                parseAttribute.call(self, element, k[i]);
-                            }
-                        } else {
-                            // Parse attributes
-                            parseAttribute.call(self, element, k[i]);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check the children
-        if (element.children && element.children.length) {
-            t = [];
-            for (let i = 0; i < element.children.length; i++) {
-                t.push(element.children[i]);
-            }
-            for (let i = 0; i < t.length; i++) {
-                parse.call(self, t[i], components);
-            }
-        } else {
-            if (element.textContent) {
-                // Parse textual content
-                parseContent.call(self, element, components);
-            }
-        }
-
-        // Render component
-        t = element.lemonade;
-        if (t && t.handler && ! t.loop) {
-            let s = getAttributes.call(element, true);
-            // Make sure we have the attributes with the most recent values
-            L.setProperties.call(s, t.self);
-            // Make sure the self goes as a reference
-            L.setProperties.call(t.self, s, true);
-            // Reference to the element
-            register(t.self, 'parent', self);
-            // Create component
-            L.render(t.handler, element, t.self, t.template, true, components);
-        }
-    }
-
-    /**
      * Extract variables from the dynamic and append to the self
      * @return {[string, array]} grab the literal injection
      */
-    const dynamic = function() {
-        let d = [];
-        let a = arguments;
-        let total = a[0].length - 1;
-
-        const result = a[0].map((value, index) => {
-            if (index < total) {
-                d.push({
-                    v: a[index+1]
-                });
-                return value + '{{__lm=' + (index) + '}}';
-            } else {
-                return value;
-            }
-        }).join('');
-
+    const parseTemplate = function() {
+        let args = Array.from(arguments);
+        // Remove first
+        args.shift()
         // Return the final template
-        return [result,d];
+        return args;
     }
 
     // LemonadeJS object
@@ -864,197 +1227,96 @@
 
     /**
      * Render a lemonade DOM element, method or class into a root DOM element
-     * @param {function|HTMLElement} o - LemonadeJS component or DOM created
-     * @param {HTMLElement} el - root DOM element to receive the new HTML
+     * @param {function} component - LemonadeJS component or DOM created
+     * @param {HTMLElement} root - root DOM element to receive the new HTML
      * @param {object?} self - self to be used
-     * @param {string?} template - template to be used
-     * @param {boolean?} action - before (true), append (false)
-     * @param {object} components - running with components
+     * @param {object?} item - item
      * @return {HTMLElement|boolean} o
      */
-    L.render = function(o, el, self, template, action, components) {
-        // Component
-        let args = Array.from(arguments);
+    L.render = function(component, root, self, item) {
 
-        // Root element but be a valid DOM element
-        if (!isDOM(el)) {
-            console.error('Invalid DOM')
+        if (typeof(component) !== 'function') {
+            console.error('Component is not a function');
             return false;
         }
 
-        if (! components) {
-            components = {};
-        }
-
-        // Flexible element (class or method)
-        if (typeof(o) == 'function') {
-            if (isClass(o)) {
-                if (typeof(self) === 'undefined') {
-                    self = new o({});
-                }
-                o = L.element(self.render(template), self, components);
-            } else {
-                if (typeof(self) === 'undefined') {
-                    self = {};
-                }
-                // Execute component
-                o = o.call(self, template, components);
-
-                // Process return
-                if (typeof(o) === 'function') {
-                    let d = o(dynamic.bind({ c: o, s: self }));
-                    components.__REF = d[1];
-                    o = L.element(d[0], self, components);
-                } else if (typeof(o) === 'string') {
-                    o = L.element(o, self, components);
-                }
-            }
-
-            if (! isDOM(o)) {
-                console.error('Invalid DOM return');
-                return false;
-            }
-
-            // Process the first child
-            o = o.firstChild;
-        }
-
-        // Keep reference to the root elements
-        if (o.tagName === 'ROOT') {
-            // Keep the references
-            o.root = Array.from(o.childNodes);
-            o.rootChild = o.children[0];
-            // Append
-            if (action === true) {
-                el.before(...o.childNodes);
-                el.remove();
-            } else {
-                el.append(...o.childNodes);
-            }
-        } else {
-            // Reference
-            o.root = [o];
-            o.rootChild = o;
-            // Append
-            if (action === true) {
-                el.before(o);
-                el.remove();
-            } else {
-                el.append(o);
-            }
-        }
-
-        // Refresh property
-        register(self, 'refresh', function (p) {
-            // Re-render the whole component
-            if (typeof(p) === 'undefined') {
-                // Reference to before
-                args[1] = o.rootChild;
-                // Self
-                args[2] = this;
-                // Action before
-                args[4] = true;
-                // Apply that to a new render
-                L.render.apply(null, args);
-                // Remove old items
-                let t;
-                while (t = o.root.shift()) {
-                    t.remove();
-                }
-            } else {
-                let s = extractFromPath.call(this, p, true);
-                if (s) {
-                    dispatch.call(s[0], s[1]);
-                }
-            }
-        });
-
-        // Process ready queue
-        queue(el);
-
-        o.rootChild.lemon = {
-            self: self
-        }
-
-        return o;
-    }
-
-    /**
-     * Create a new component
-     * @param {string|HTMLElement} t - HTML template to be parsed or a existing DOM element
-     * @param {object} self - The default self object
-     * @param {object?} components - all custom components references
-     * @return {HTMLElement|null} el - result of the DOM parse
-     */
-    L.element = function(t, self, components) {
-        // Element
-        let el;
-        let root;
-        // Lemonade handler
-        if (typeof(self) === 'undefined') {
+        // In case the self has not initial definition by the developer
+        if (typeof(self) !== 'object') {
             self = {};
         }
 
-        // Make sure all uppercase
-        if (typeof(components) === 'object') {
-            let k = Object.keys(components);
-            // Make sure they follow the standard
-            for (let i = 0; i < k.length; i++) {
-                components[k[i].toUpperCase()] = components[k[i]];
-            }
+        let lemon = {
+            self: self,
+            events: [],
+            ready: [],
         }
 
-        // Parse a HTML template
-        if (! isDOM(t)) {
-            if (! t) {
-                t = '';
-            }
-            // Close any custom not fully closed component
-            t = t.trim()
-                .replace(/(<(([A-Z]{1}|[a-z]*-){1}[a-zA-Z0-9_-]+)[^>]*)(\/|\/.{1})>/gm, "$1></$2>")
-                .replace(/<>/gi, "<root>").replace(/<\/>/gi, "<\/root>").trim();
-            // Create the root element
-            el = create('template', t);
+        if (! item) {
+            item = {};
+        }
 
-            // Extract
-            if (el.content) {
-                el = el.content;
-            } else {
-                el = create('div', t);
-            }
+        let view;
+        let result;
 
-            // Already single DOM, do not need a container
-            if (el.childNodes.length > 1) {
-                console.error('Single root required');
-                return null;
-            } else {
-                root = el;
-                el = el.firstChild;
+        // New self
+        if (isClass(component)) {
+            self = new component(self);
+            view = self.render(item.template, item.children);
+        } else {
+            // Execute component
+            view = component.call(self, item.template, item.children);
+        }
+
+        // Values
+        let values = [];
+        // Process return
+        if (typeof(view) === 'function') {
+            values = view(parseTemplate);
+            // A render template to be executed
+            lemon.view = view;
+            // Template from the method
+            result = view.toString().split('`');
+            // Get the original template
+            if (result) {
+                result = result[1].trim();
             }
         } else {
-            el = t;
-            root = el;
+            result = view;
         }
 
-        // Parse the content
-        parse.call(self, el, components);
-
-        // Create the el bound to the self
-        register(self, 'el', el);
-
-        // Onload event
-        if (typeof(self.onload) == 'function') {
-            R.queue.push({
-                type: 'onload',
-                method: self.onload.bind(self, el),
-            });
+        // Virtual DOM tree
+        if (typeof(result) === 'string') {
+            result = HTMLParser(result, values);
         }
 
-        return root;
+        // Process the result
+        if (result) {
+            // Get the HTML virtual DOM representation
+            lemon.tree = result;
+
+            // Create real DOM and append to the root
+            let element = generateHTML(lemon);
+
+            // Register root element TODO: resolver quando vem root
+            register(lemon.self, 'el', element);
+
+            // Append element to the DOM
+            if (root) {
+                if (element.tagName === 'ROOT') {
+                    while (element.firstChild) {
+                        root.appendChild(element.firstChild);
+                    }
+                } else {
+                    root.appendChild(element);
+                }
+            }
+
+            // Process the onload
+            processOnload(lemon);
+
+            return element;
+        }
     }
-
-    // Deprecated
-    L.template = L.element;
 
     /**
      * Apply self to an existing appended DOM element
@@ -1063,10 +1325,6 @@
      * @param {object?} components - object with component declarations
      */
     L.apply = function(el, s, components) {
-        // Generate the element
-        L.element(el, s, components);
-        // Process whatever we have in the queue
-        queue(el);
     }
 
     /**
@@ -1114,7 +1372,7 @@
      * @returns {Object | Function} - registered element
      */
     L.get = function(name) {
-        return R.container[name];
+        return sugar.get(name);
     }
 
     /**
@@ -1124,12 +1382,10 @@
      * @param {boolean} persistence - optional the persistence flag. Only applicable for functions.
      */
     L.set = function(name, e, persistence) {
-        // Add to the common container
-        R.container[name] = e;
         // Applicable only when the o is a function
         if (typeof(e) === 'function' && persistence === true) {
             // Keep the flag
-            R.container[name].storage = true;
+            e.storage = true;
             // Any existing values
             let t = window.localStorage.getItem(name);
             if (t) {
@@ -1139,6 +1395,8 @@
                 e(t);
             }
         }
+        // Save to the sugar container
+        sugar.set(name, e);
     }
 
     /**
@@ -1148,13 +1406,13 @@
      */
     L.dispatch = function(name, data) {
         // Get from the container
-        let h = R.container[name];
+        let e = sugar.get(name);
         // Confirm that the alias is a function
-        if (typeof(h) === 'function') {
+        if (typeof(e) === 'function') {
             // Dispatch the data to the function
-            h(data);
+            e(data);
             // Save the data to the local storage
-            if (h.storage === true) {
+            if (e.storage === true) {
                 window.localStorage.setItem(name, JSON.stringify(data));
             }
         }
@@ -1203,7 +1461,7 @@
         const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
-        if (window.customElements.get(componentName)) {
+        if (customElements.get(componentName)) {
             console.warn(`${componentName} is already defined.`);
         } else {
             class Component extends HTMLElement {
@@ -1257,6 +1515,40 @@
             window.customElements.define(componentName, Component);
         }
     }
+
+    L.h = function(type, props, ...children) {
+        return { type, props: props || {}, children };
+    }
+
+    L.Fragment = function(props) {
+        return props.children;
+    }
+
+    L.onload = function(self, event) {
+        onload.set(self, event);
+    }
+
+    L.onchange = function(self, event) {
+        let events = onchange.get(self);
+        if (! events) {
+            events = [];
+            onchange.set(self, events);
+        }
+        events.push(event);
+    }
+
+    L.state = function(self, def) {
+
+        let value = def;
+
+        let setValue = (v) => {
+            value = v;
+        }
+
+        return [value, setValue];
+    }
+
+    L.strict = false;
 
     return L;
 })));

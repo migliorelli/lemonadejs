@@ -65,8 +65,8 @@ describe('Properties', () => {
             let self = this;
             self.value = 100;
             return `<>
-                <ClassComponent value="{{self.value}}" @ref="self.class" />
-                <FunctionComponent value="{{self.value}}" @ref="self.function" />
+                <ClassComponent value="{{self.value}}" :ref="self.class" />
+                <FunctionComponent value="{{self.value}}" :ref="self.function" />
             </>`;
         }
 

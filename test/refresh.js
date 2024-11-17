@@ -15,7 +15,7 @@ describe('Refresh', () => {
                 <p></p>
                 <Test value="1"/>
                 <p></p>
-                <Test value="2" @ref="self.reference"/>
+                <Test value="2" :ref="self.reference"/>
                 <p></p>
                 <Test value="3"/>
             </>`;
@@ -53,7 +53,7 @@ describe('Refresh', () => {
                 {title: 'Duckduckgo', description: 'Privacy in the first place...', status: 1},
             ];
 
-            return `<><Test @loop="self.rows" /></>`;
+            return `<><Test :loop="self.rows" /></>`;
         }
 
 

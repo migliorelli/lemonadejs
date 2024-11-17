@@ -11,7 +11,7 @@ describe('Loop', () => {
             ];
 
             return `<>
-            <ul @loop="self.data" @ref="self.root">
+            <ul :loop="self.data" :ref="self.root">
                 <li>{{self.title}}</li>
             </ul>
         </ul>`;
@@ -35,7 +35,7 @@ describe('Loop', () => {
                 {title: 'angular'}
             ];
 
-            return `<ul @loop="self.data" @ref="self.root">
+            return `<ul :loop="self.data" :ref="self.root">
             <li>{{self.title}}</li>
         </ul>`;
         }
@@ -67,7 +67,7 @@ describe('Loop', () => {
             ];
 
             // Custom components such as List should always be unique inside a real tag.
-            let template = `<ul><Mylist @loop="self.rows" /></ul>`;
+            let template = `<ul><Mylist :loop="self.rows" /></ul>`;
 
             // Passing as a local component. It means, won't be available globally
             return lemonade.element(template, self, {Mylist});
