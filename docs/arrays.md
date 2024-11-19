@@ -7,7 +7,11 @@ description: Generate lists of elements from arrays using the loop attribute.
 Arrays
 ======
 
-The `:loop` attribute in LemonadeJS is a powerful tool for dynamically creating lists of elements, such as product listings or data grids, in the user interface. It works by iterating over an array of objects and using a template string to define how each element should be represented as a DOM element. This section will explore advanced features such as implementing search functionality that allows the list to be updated in real-time as new elements are added, or existing ones are filtered. That facilitates the creation of highly interactive and responsive interfaces where users can interact with complex datasets efficiently. 
+The `:loop` attribute in LemonadeJS is a powerful tool for dynamically creating lists of elements, such as product listings or data grids, in the user interface. 
+
+It works by iterating over an array of objects and using a template string to define how each element should be represented as a DOM element. 
+
+This section will explore advanced features such as implementing search functionality that allows the list to be updated in real-time as new elements are added, or existing ones are filtered. That facilitates the creation of highly interactive and responsive interfaces where users can interact with complex datasets efficiently. 
 
 > **Summary of this chapter**
 >
