@@ -50,12 +50,14 @@ describe('Loop', () => {
     });
 
     it('Add a new item in the loop and refresh', function() {
-        let Mylist = function () {
+        let Test = function () {
             // Create one self for each interaction in the array
             const self = this;
             // Template
             return `<li><b>{{self.title}}</b><br><i>{{self.description}}</i></li>`;
         }
+
+        lemonade.setComponent({Test})
 
         let Component = function () {
             const self = this;
@@ -67,10 +69,7 @@ describe('Loop', () => {
             ];
 
             // Custom components such as List should always be unique inside a real tag.
-            let template = `<ul><Mylist :loop="self.rows" /></ul>`;
-
-            // Passing as a local component. It means, won't be available globally
-            return lemonade.element(template, self, {Mylist});
+            return `<ul><Test :loop="self.rows" /></ul>`;
         }
 
         // Render the component and assert the return
