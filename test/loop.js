@@ -94,7 +94,62 @@ describe('Loop', () => {
     });
 
 
+    it('Loop including custom element', function() {
+        function Test() {
+            // Create one self for each interaction in the array
+            const self = this;
+            // Template
+            return `<li>{{self.title}}</li>`;
+        }
 
+        // Register as a global component.
+        lemonade.setComponents({Test});
+
+        function Component() {
+            const self = this;
+
+            self.rows = [
+                {title: 'Google', description: 'The alpha search engine...'},
+            ];
+
+            // Custom components such as List should always be unique inside a real tag.
+            return (render) => render`<ul :loop="self.rows"><Test :title="self.title" /></ul>`;
+        }
+
+
+        // Render the component and assert the return
+        return render(Component).assert('Google', function () {
+            let self = this;
+            return self.el.textContent;
+        })
+    });
+
+    it('Loop including a custom element by reference', function() {
+        function Test() {
+            // Create one self for each interaction in the array
+            const self = this;
+            // Template
+            return `<li>{{self.title}}</li>`;
+        }
+
+        function Component() {
+            const self = this;
+
+            self.rows = [
+                {title: 'Google', description: 'The alpha search engine...'},
+            ];
+
+            // Custom components such as List should always be unique inside a real tag.
+            return (render) => render`<ul :loop="self.rows"><${Test} :title="self.title" /></ul>`;
+        }
+
+
+        // Render the component and assert the return
+        return render(Component).assert('Google', function () {
+            let self = this;
+            return self.el.textContent;
+        })
+    });
 
 
 

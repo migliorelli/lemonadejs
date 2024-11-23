@@ -146,6 +146,8 @@
         return false;
     }
 
+    const elementNotReady = [];
+
     /**
      * Process the onload methods
      */
@@ -171,6 +173,20 @@
             if (typeof(s.onload) === 'function') {
                 s.onload.call(s, s.el);
             }
+            // Pending ones
+            let totalOfItems = elementNotReady.length;
+            if (totalOfItems) {
+                // Clone array
+                let items = [...elementNotReady];
+                // Reset queue
+                elementNotReady.length = 0;
+                // Process all items
+                for (let i = 0; i < totalOfItems; i++) {
+                    processOnload(items[i]);
+                }
+            }
+        } else {
+            elementNotReady.unshift(lemon);
         }
     }
 
@@ -294,10 +310,14 @@
         const getExpression = function(tag) {
             // Get value
             const v = values && values[this.index] !== undefined ? values[this.index] : '';
-            // Keep the reference
-            tag.expression = this.reference;
-            // Keep the index
-            tag.index = this.index++;
+            if (tag) {
+                // Keep the reference
+                tag.expression = this.reference;
+                // Keep the index
+                tag.index = this.index;
+            }
+            // Move the value index
+            this.index++;
             // Delete reference
             delete this.reference;
             // Return value
@@ -310,7 +330,7 @@
         const commitText = function() {
             if (typeof(this.text) !== 'undefined') {
                 const text = this.text.replace(/^\s*$/gm, "");
-                if (text.trim()) {
+                if (text) {
                     createTextNode.call(this, { content: text });
                 }
                 delete this.text;
@@ -391,7 +411,7 @@
             } else {
                 if (char === '$' && this.reference) {
                     // Custom tags
-                    this.tag.type = getExpression.call(this, this.tag);
+                    this.tag.type = getExpression.call(this);
                 }
                 // Finished with tag name, move to attribute handling
                 this.action = 'attributeName';
@@ -484,7 +504,9 @@
                     delete this.tag.attributeIsReadyToClose;
                 }
             } else if (char.match(/\s/)) {
-                this.tag.attributeIsReadyToClose = true;
+                if (this.tag.attributeName) {
+                    this.tag.attributeIsReadyToClose = true;
+                }
             }
         };
 
@@ -709,7 +731,7 @@
 
                 return text;
             } catch (e) {
-                createError('It was not possible to parse ', text)
+                createError('It was not possible to parse ', text, e)
             }
         }
 
@@ -774,9 +796,6 @@
          * @param prop
          */
         const applyBindHandler = function(item, prop) {
-            // Bind property
-            item.bind = true;
-
             // Event from component to the property
             let event = function() {
                 let value = getAttribute(getElement(item), 'value');
@@ -786,7 +805,7 @@
             }
 
             if (typeof(item.type) === 'function') {
-                L.onchange(item.self, event);
+                item.bind = event;
             } else {
                 item.element.addEventListener('input', event);
             }
@@ -817,20 +836,15 @@
             }
         }
 
+        const getRoot = function(item) {
+            return typeof(item.type) === 'function' ? item.parent.element : item.element;
+        }
+
         const registerLoop = function(item, prop) {
-            // Register a loop item
-            item.loop = true;
-            // Get template
-            item.template = getTemplate(item);
             // Event
             let event = function() {
                 // Component
                 let method = typeof(item.type) === 'function' ? item.type : Basic;
-                // Root element
-                let root = item.element;
-                if (typeof(root) === 'undefined') {
-                    root = item.parent.element;
-                }
                 // Elements
                 let items = [];
                 // Get the data
@@ -839,28 +853,48 @@
                 if (data && Array.isArray(data)) {
                     // Process data
                     data.forEach(function(self) {
-                        if (! self.el) {
+                        let el = self.el;
+                        if (! el) {
                             // Register parent
                             register(self, 'parent', lemon.self);
                             // Render
-                            L.render(method, null, self, item);
+                            el = L.render(method, null, self, item);
                         }
-                        items.push(self.el);
+                        items.push(el);
                     })
                 }
-
                 // Remove all DOM
-                while (root.firstChild) {
-                    root.firstChild.remove();
-                }
-                // Insert elements to the DOM
-                while (items.length) {
-                    root.appendChild(items.shift());
+                let root = getRoot(item);
+                if (root) {
+                   while (root.firstChild) {
+                       root.firstChild.remove();
+                   }
+                   // Insert elements to the DOM
+                   while (items.length) {
+                       root.appendChild(items.shift());
+                   }
                 }
             }
-            // Append event
-            appendEvent(prop, event, true);
 
+            // Append event
+            let root = getRoot(item);
+            if (root) {
+                appendEvent(prop, event, true);
+            } else {
+                appendEvent(prop, event);
+                // Defer event since the dom is not ready
+                lemon.ready.push(event)
+            }
+        }
+
+        const isLoopAttribute = function(props) {
+            let test = false;
+            props.forEach(function(prop) {
+                if (prop.name === ':loop' || prop.name === 'lm-loop') {
+                    test = true;
+                }
+            });
+            return test;
         }
 
         const appendChildren = function(container, children) {
@@ -884,16 +918,29 @@
                     // Check for dynamic content
                     applyNodeContent(item);
                 } else {
-                    // Create all children
-                    if (item.children) {
-                        item.children.forEach(child => {
-                            createElements(child);
-                        });
+                    // Apply attributes if they exist
+                    if (item.props && ! Array.isArray(item.props)) {
+                        let props = [];
+                        let keys = Object.keys(item.props);
+                        for (let i = 0; i < keys.length; i++) {
+                            props.push({ name: keys[i], value: item.props[keys[i]] });
+                        }
+                        item.props = props;
+                    } else if (! item.props) {
+                        item.props = [];
+                    }
+
+                    // This item is a parent for a loop
+                    if (isLoopAttribute(item.props)) {
+                        // Mark this item as a loop
+                        item.loop = true;
                     }
 
                     if (! item.type) {
                         item.type = 'root';
-                    } else if (typeof(item.type) === 'string') {
+                    }
+
+                    if (typeof(item.type) === 'string') {
                         if (item.type.match(/^[A-Z][a-zA-Z0-9\-]*$/g)) {
                             let controller = item.type.toUpperCase();
                             if (typeof (R.components[controller]) === 'function') {
@@ -902,66 +949,59 @@
                         }
                     }
 
-                    // Create the element for the current tag
                     if (typeof(item.type) === 'string') {
                         item.element = document.createElement(item.type);
                     } else if (typeof(item.type) === 'function') {
                         item.self = {};
                     }
 
-                    // Apply attributes if they exist
-                    if (item.props) {
-                        if (! Array.isArray(item.props)) {
-                            let props = [];
-                            let keys = Object.keys(item.props);
-                            for (let i = 0; i < keys.length; i++) {
-                                props.push({ name: keys[i], value: item.props[keys[i]] });
-                            }
-                            item.props = props;
-                        }
+                    // Create all children
+                    if (item.children && ! item.loop) {
+                        item.children.forEach(child => {
+                            createElements(child);
+                        });
+                    }
 
-                        if (item.props.length) {
-                            item.props.forEach(function(prop) {
-                                if (item.element && prop.name.startsWith('on')) {
-                                    let method = prop.value;
-                                    let event = prop.name.substring(2);
-                                    item.element.addEventListener(event, method)
-                                } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
-                                    // Create a reference to the DOM element
-                                    let property = prop.expression || prop.value;
-                                    // Get the attribute name
-                                    property = extractTokens(property);
-                                    // Reference name is found
-                                    if (property.length === 1) {
-                                        // Whe need the entry
-                                        property = property[0];
-                                        // Special lemonade attribute name
-                                        let attributeName = prop.name[0] === ':' ? prop.name.substring(1) : prop.name.substring(3);
-                                        // Is that a special event
-                                        if (attributeName === 'ref') {
-                                            createReference(item, property)
-                                        } else if (attributeName === 'bind') {
-                                            applyBindHandler(item, property);
-                                        } else if (attributeName === 'ready') {
-                                            whenIsReady(item, property);
-                                        } else if (attributeName === 'loop') {
-                                            registerLoop(item, property);
-                                        } else {
-                                            setDynamicValue(item, property, attributeName);
-                                        }
+                    // Process attributes
+                    if (item.props.length) {
+                        item.props.forEach(function(prop) {
+                            if (item.element && prop.name.startsWith('on')) {
+                                let method = prop.value;
+                                let event = prop.name.substring(2);
+                                item.element.addEventListener(event, method)
+                            } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
+                                // Create a reference to the DOM element
+                                let property = prop.expression || prop.value;
+                                // Get the attribute name
+                                property = extractTokens(property);
+                                // Reference name is found
+                                if (property.length === 1) {
+                                    // Whe need the entry
+                                    property = property[0];
+                                    // Special lemonade attribute name
+                                    let attributeName = prop.name[0] === ':' ? prop.name.substring(1) : prop.name.substring(3);
+                                    // Is that a special event
+                                    if (attributeName === 'ref') {
+                                        createReference(item, property)
+                                    } else if (attributeName === 'bind') {
+                                        applyBindHandler(item, property);
+                                    } else if (attributeName === 'ready') {
+                                        whenIsReady(item, property);
+                                    } else if (attributeName === 'loop') {
+                                        registerLoop(item, property);
+                                    } else {
+                                        setDynamicValue(item, property, attributeName);
                                     }
-                                } else {
-                                    applyElementAttribute(item, prop);
                                 }
-                            })
-                        }
+                            } else {
+                                applyElementAttribute(item, prop);
+                            }
+                        })
                     }
 
                     // Do not create elements at this state if this is a loop
                     if (! item.loop) {
                         if (typeof (item.type) === 'function') {
-                            // Create DOM tree
-                            item.template = getTemplate(item);
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
                             // Register
@@ -981,17 +1021,6 @@
 
         // Create DOM elements
         createElements(lemon.tree);
-
-        // Apply events
-        if (lemon.events) {
-            let props = Object.keys(lemon.events);
-            if (props.length) {
-                for (let i = 0; i <props.length; i++) {
-                    let prop = props[i];
-                    trackProperty.call(lemon.self, prop, lemon.events[prop]);
-                }
-            }
-        }
 
         return lemon.tree.element;
     }
@@ -1222,6 +1251,27 @@
         return args;
     }
 
+    function spreadCloneChildren(element) {
+        // Base case: if element is null/undefined or not an object, return as is
+        if (!element || typeof element !== 'object') {
+            return element;
+        }
+
+        // Handle arrays
+        if (Array.isArray(element)) {
+            return element.map(item => spreadCloneChildren(item));
+        }
+
+        // Create new object with spread operator
+        return {
+            ...element,
+            // Only recursively clone the children property if it exists
+            ...(element.children && {
+                children: spreadCloneChildren(element.children)
+            })
+        };
+    }
+
     // LemonadeJS object
     const L = {};
 
@@ -1235,13 +1285,13 @@
      */
     L.render = function(component, root, self, item) {
 
-        if (typeof(component) !== 'function') {
+        if (component && typeof(component) !== 'function') {
             console.error('Component is not a function');
             return false;
         }
-
+console.log(arguments)
         // In case the self has not initial definition by the developer
-        if (typeof(self) !== 'object') {
+        if (typeof(self) === 'undefined') {
             self = {};
         }
 
@@ -1249,6 +1299,7 @@
             self: self,
             events: [],
             ready: [],
+            root: root,
         }
 
         if (! item) {
@@ -1259,12 +1310,16 @@
         let result;
 
         // New self
-        if (isClass(component)) {
-            self = new component(self);
-            view = self.render(item.template, item.children);
+        if (component === Basic) {
+            view = spreadCloneChildren(item.children[0]);
         } else {
-            // Execute component
-            view = component.call(self, item.template, item.children);
+            if (isClass(component)) {
+                self = new component(self);
+                view = self.render(item.template, item.children);
+            } else {
+                // Execute component
+                view = component.call(self, item.template, item.children);
+            }
         }
 
         // Values
@@ -1289,33 +1344,84 @@
             result = HTMLParser(result, values);
         }
 
+        let element;
+
         // Process the result
         if (result) {
             // Get the HTML virtual DOM representation
             lemon.tree = result;
 
             // Create real DOM and append to the root
-            let element = generateHTML(lemon);
+            element = generateHTML(lemon);
+            if (element) {
+                // Register element when is not registered inside the component
+                if (! lemon.self.el) {
+                    register(lemon.self, 'el', element);
+                }
 
-            // Register root element TODO: resolver quando vem root
-            register(lemon.self, 'el', element);
-
-            // Append element to the DOM
-            if (root) {
-                if (element.tagName === 'ROOT') {
-                    while (element.firstChild) {
-                        root.appendChild(element.firstChild);
+                // Append element to the DOM
+                if (root) {
+                    // Parents
+                    let elements = [];
+                    // Append parents
+                    if (element.tagName === 'ROOT') {
+                        element.childNodes.forEach((e) => {
+                            elements.push(e);
+                        });
+                    } else {
+                        elements.push(element);
                     }
-                } else {
-                    root.appendChild(element);
+
+                    elements.forEach((e) => {
+                        root.appendChild(e);
+                    });
+
+                    register(lemon.self, 'refresh', () => {
+                        elements.forEach((e) => {
+                            e.remove();
+                        });
+
+                        L.render(...arguments);
+                    });
                 }
             }
-
-            // Process the onload
-            processOnload(lemon);
-
-            return element;
         }
+
+        // Bind to custom component
+        if (item.bind) {
+            let token = 'value';
+            if (! lemon.events[token]) {
+                lemon.events[token] = []
+            }
+            // Push the event
+            lemon.events[token].push(item.bind);
+        }
+
+        // Apply events
+        if (lemon.events) {
+            let props = Object.keys(lemon.events);
+            if (props.length) {
+                for (let i = 0; i <props.length; i++) {
+                    let prop = props[i];
+                    trackProperty.call(lemon.self, prop, lemon.events[prop]);
+                }
+            }
+        }
+
+        // Process the onload
+        if (element) {
+            processOnload(lemon);
+        }
+
+        return element;
+    }
+
+    /**
+     * Deprecated
+     * @param {string} template
+     */
+    L.element = function(template) {
+        return template;
     }
 
     /**
