@@ -3,15 +3,16 @@ describe('Refresh', () => {
     it('Testing node position after full refresh', function() {
         function Test() {
             let self = this;
-            let template = `<div>{{self.value}}</div>`;
-
-            return lemonade.element(template, self);
+            return `<div>{{self.value}}</div>`;
         }
+
+        // Register as a global component.
+        lemonade.setComponents({Test});
 
         // Get the attributes from the tag
         function Component() {
             let self = this;
-            let template = `<>
+            return `<>
                 <p></p>
                 <Test value="1"/>
                 <p></p>
@@ -19,12 +20,7 @@ describe('Refresh', () => {
                 <p></p>
                 <Test value="3"/>
             </>`;
-
-            return lemonade.element(template, self, {Test});
         }
-
-        // Register as a global component.
-        lemonade.setComponents({Test});
 
         // Render the component and assert the return
         return render(Component).assert('2', function () {

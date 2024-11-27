@@ -99,17 +99,19 @@
                         });
                     }
                     // Refresh bound elements
-                    let change = onchange.get(s);
-                    if (change) {
-                        change.forEach((action) => {
-                            if (typeof(action) === 'function') {
-                                action.call(s, prop, oldValue, v);
-                            }
-                        })
-                    }
-                    // Native onchange
-                    if (typeof(s.onchange) === 'function') {
-                        s.onchange.call(s, prop, oldValue, v);
+                    if (v !== oldValue) {
+                        let change = onchange.get(s);
+                        if (change) {
+                            change.forEach((action) => {
+                                if (typeof (action) === 'function') {
+                                    action.call(s, prop, oldValue, v);
+                                }
+                            })
+                        }
+                        // Native onchange
+                        if (typeof(s.onchange) === 'function') {
+                            s.onchange.call(s, prop, oldValue, v);
+                        }
                     }
                 },
                 get: function () {
@@ -1001,7 +1003,7 @@
 
                     // Do not create elements at this state if this is a loop
                     if (! item.loop) {
-                        if (typeof (item.type) === 'function') {
+                        if (typeof(item.type) === 'function') {
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
                             // Register
@@ -1285,11 +1287,11 @@
      */
     L.render = function(component, root, self, item) {
 
-        if (component && typeof(component) !== 'function') {
+        if (typeof(component) !== 'function') {
             console.error('Component is not a function');
             return false;
         }
-console.log(arguments)
+
         // In case the self has not initial definition by the developer
         if (typeof(self) === 'undefined') {
             self = {};
@@ -1354,34 +1356,40 @@ console.log(arguments)
             // Create real DOM and append to the root
             element = generateHTML(lemon);
             if (element) {
-                // Register element when is not registered inside the component
-                if (! lemon.self.el) {
-                    register(lemon.self, 'el', element);
+                // Parents
+                let elements = [];
+                // Append parents
+                if (element.tagName === 'ROOT') {
+                    element.childNodes.forEach((e) => {
+                        elements.push(e);
+                    });
+                } else {
+                    elements.push(element);
                 }
 
-                // Append element to the DOM
-                if (root) {
-                    // Parents
-                    let elements = [];
-                    // Append parents
-                    if (element.tagName === 'ROOT') {
-                        element.childNodes.forEach((e) => {
-                            elements.push(e);
-                        });
+                // Register element when is not registered inside the component
+                register(lemon.self, 'el', element);
+
+                // Refresh
+                register(lemon.self, 'refresh', (prop) => {
+                    if (prop) {
+                        lemon.self[prop] = lemon.self[prop];
                     } else {
-                        elements.push(element);
-                    }
-
-                    elements.forEach((e) => {
-                        root.appendChild(e);
-                    });
-
-                    register(lemon.self, 'refresh', () => {
+                        let e = L.render(...arguments);
+                        if (! root) {
+                            let root = elements[0];
+                            root.parentNode.insertBefore(e, root);
+                        }
                         elements.forEach((e) => {
                             e.remove();
                         });
+                    }
+                });
 
-                        L.render(...arguments);
+                // Append element to the DOM
+                if (root) {
+                    elements.forEach((e) => {
+                        root.appendChild(e);
                     });
                 }
             }

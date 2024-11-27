@@ -57,7 +57,7 @@ describe('Loop', () => {
             return `<li><b>{{self.title}}</b><br><i>{{self.description}}</i></li>`;
         }
 
-        lemonade.setComponent({Test})
+        lemonade.setComponents({Test})
 
         let Component = function () {
             const self = this;
@@ -92,7 +92,6 @@ describe('Loop', () => {
             return self.el.children[0].textContent;
         })
     });
-
 
     it('Loop including custom element', function() {
         function Test() {
