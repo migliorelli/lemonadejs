@@ -53,7 +53,6 @@ describe('General', () => {
         })
     });
 
-
     it('Integrating LemonadeJS with web-components', function() {
         class HelloElement extends HTMLElement {
 
@@ -98,6 +97,26 @@ describe('General', () => {
         return render(Component).assert('120', function () {
             let self = this;
             return self.element.firstChild.firstChild.textContent;
+        })
+    });
+
+    it('Ready as a function', function() {
+        // Get the attributes from the tag
+        function Component() {
+            const ready = (a) => {
+                a.textContent = 'test';
+            }
+
+            // Title and year are declared in the parent template
+            return render => render`<div>
+                <h1 :ready="${ready}">h1</h1>
+            </div>`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('test', function () {
+            let self = this;
+            return self.el.innerText;
         })
     });
 });
