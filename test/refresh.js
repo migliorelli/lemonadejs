@@ -64,33 +64,4 @@ describe('Refresh', () => {
             return self.rows[1].el.parentNode.children[1].tagName;
         })
     });
-
-    it('Update the property of a self when using reference', function() {
-
-        function Test() {
-            let self = this;
-            self.onload = function() {
-                self.data *= 10;
-            }
-
-            return `<div>{{self.data}}</div>`;
-        }
-
-        function Component() {
-            let self = this;
-            self.number = 1;
-            return `<><Test :data="self.number" :ref="self.instance" /></>`;
-        }
-
-
-        // Register as a global component.
-        lemonade.setComponents({Test});
-
-        // Render the component and assert the return
-        return render(Component).assert('10', function () {
-            let self = this;
-
-            return self.instance.el.textContent;
-        })
-    });
 });

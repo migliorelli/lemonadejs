@@ -39,4 +39,29 @@ describe('Events', () => {
             return self.el.textContent;
         })
     });
+
+    it('Nested events', function() {
+        function Component() {
+            this.value = 1;
+
+            this.test = {};
+            this.test.click = () => {
+                this.value++;
+            }
+
+            // Title and year are declared in the parent template
+            return `<div>
+                <h1>{{this.value}}</h1>
+                <input type="button" onclick="self.test.click" />
+            </div>`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('2', function () {
+            let self = this;
+            self.el.click()
+            // Return the value
+            return self.el.textContent;
+        })
+    });
 });

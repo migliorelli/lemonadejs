@@ -34,10 +34,7 @@
         }
     }
 
-    const state = new Set;
     const sugar = new Map;
-    const onload = new Map;
-    const onchange = new Map;
     const components = new Map;
 
     // Script expression inside LemonadeJS templates
@@ -47,7 +44,7 @@
      * Show a better error developers
      */
     const createError = function() {
-        console.error('LemonadeJS', ...arguments)
+        throw new Error('LemonadeJS ' + Array.from(arguments).join(' '));
     }
 
     /**
@@ -72,15 +69,19 @@
 
     /**
      * Bind a property to one action and start tracking
-     * @param {string} prop - property to be tracked
-     * @param {object} events - events to be actioned when this property is updated
+     * @param {object} lemon
+     * @param {string} prop
      */
-    const trackProperty = function(prop, events) {
+    const trackProperty = function(lemon, prop) {
         // Lemon handler
-        let s = this;
+        let s = lemon.self;
         if (typeof(s) === 'object') {
+            // Change
+            let change = lemon.change;
+            // Events
+            let events = lemon.events[prop];
             // Current value
-            let value = this[prop];
+            let value = s[prop];
             // Do not allow undefined
             if (typeof(value) === 'undefined') {
                 value = '';
@@ -100,8 +101,7 @@
                     }
                     // Refresh bound elements
                     if (v !== oldValue) {
-                        let change = onchange.get(s);
-                        if (change) {
+                        if (change && change.length) {
                             change.forEach((action) => {
                                 if (typeof (action) === 'function') {
                                     action.call(s, prop, oldValue, v);
@@ -156,24 +156,18 @@
     const processOnload = function(lemon) {
         // Check if the element is appended to the DOM
         if (isAppended(lemon.tree.element)) {
+            let s = lemon.self;
             // Ready event
-            let event;
             while (lemon.ready.length) {
                 lemon.ready.shift()();
-            }
-            // Current self
-            let s = lemon.self;
-            // Onload event
-            event = onload.get(s);
-            if (event) {
-                // Remove from the queue
-                onload.delete(s);
-                // Execute onload event
-                event(s);
             }
             // Native onload
             if (typeof(s.onload) === 'function') {
                 s.onload.call(s, s.el);
+            }
+            // Current self
+            if (typeof(lemon.load) === 'function') {
+                lemon.load.call(s, s.el);
             }
             // Pending ones
             let totalOfItems = elementNotReady.length;
@@ -199,56 +193,6 @@
      */
     const getElement = function(item) {
         return typeof(item.type) === 'function' ? item.self : item.element;
-    }
-
-    const nodeToXml = function(node) {
-        function buildElement(node) {
-            // Handle text nodes
-            if (node.type === '#text') {
-                return escapeXml(node.content);
-            }
-
-            // Handle element nodes
-            const attributes = node.props?.length
-                ? ' ' + node.props
-                .map(attr => `${attr.name}="${escapeXml(attr.value)}"`)
-                .join(' ')
-                : '';
-
-            // If no children, create self-closing tag
-            if (!node.children?.length) {
-                return `<${node.type}${attributes}/>`;
-            }
-
-            // Process children
-            const childrenXml = node.children
-                .map(child => buildElement(child))
-                .join('');
-
-            // Return complete element
-            return `<${node.type}${attributes}>${childrenXml}</${node.type}>`;
-        }
-
-        // Escape special XML characters
-        function escapeXml(text) {
-            if (text === undefined || text === null) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&apos;');
-        }
-
-        return buildElement(node);
-    }
-
-    const getTemplate = function(item) {
-        if (item.children && item.children.length > 0) {
-            // Process each child individually and join the results
-            return item.children.map(child => nodeToXml(child)).join('');
-        }
-        return '';
     }
 
     const HTMLParser = function(html, values) {
@@ -282,7 +226,7 @@
             this.current.children.push({
                 type: '#text',
                 parent: this.current,
-                ...tag,
+                props: [tag],
             });
         }
 
@@ -331,9 +275,9 @@
          */
         const commitText = function() {
             if (typeof(this.text) !== 'undefined') {
-                const text = this.text.replace(/^\s*$/gm, "");
+                const text = this.text.replace(/\r?\n\s+/g, '');
                 if (text) {
-                    createTextNode.call(this, { content: text });
+                    createTextNode.call(this, { name: 'textContent', value: text });
                 }
                 delete this.text;
             }
@@ -560,8 +504,8 @@
                 // Just to check if there are any text to commit
                 commitText.call(this);
                 // Custom tags
-                let tag = {}
-                tag.content = getExpression.call(this, tag);
+                let tag = { name: 'textContent' }
+                tag.value = getExpression.call(this, tag);
                 // Add node tag
                 createTextNode.call(this, tag);
             } else {
@@ -693,15 +637,6 @@
             appendEvent(token, applyValueEvent, true);
         }
 
-        const extractDynamicValueFromTemplate = function(item, prop) {
-            createEventsFromExpression(prop.expression, function() {
-                // Extra the value from the template
-                let value = lemon.view(parseTemplate)[prop.index];
-                // Set attribute
-                setAttribute(getElement(item), prop.name, value);
-            }, true);
-        }
-
         const dynamicContent = function(text) {
             try {
                 // Cast value
@@ -712,7 +647,7 @@
                     // Try to find the property
                     let result = extractFromPath.call(s, b);
                     // Evaluation for legacy purposes
-                    if (typeof (result) === 'undefined') {
+                    if (typeof(result) === 'undefined') {
                         // This is deprecated and will be drop on LemonadeJS 6
                         result = run.call(s, b);
                         if (typeof (result) === 'undefined') {
@@ -737,24 +672,14 @@
             }
         }
 
-        const applyNodeContent = function(item) {
-            if (item.expression) {
-                // Bind method to all tokens
-                createEventsFromExpression(item.expression, function() {
-                    // Get the value from token
-                    item.element.textContent = lemon.view(parseTemplate)[item.index];
-                });
-            } else {
-                createEventsFromExpression(item.content, function() {
-                    // Dynamic text
-                    item.element.textContent = dynamicContent(item.content);
-                }, true)
-           }
-        }
-
         const applyElementAttribute = function(item, prop) {
             if (typeof(prop.expression) !== 'undefined') {
-                extractDynamicValueFromTemplate(item, prop);
+                createEventsFromExpression(prop.expression, function() {
+                    // Extra the value from the template
+                    let value = lemon.view(parseTemplate)[prop.index];
+                    // Set attribute
+                    setAttribute(getElement(item), prop.name, value);
+                }, true);
             } else {
                 // Get the tokens should be updated to populate this attribute
                 let tokens = extractTokens(prop.value);
@@ -767,12 +692,14 @@
                         setAttribute(getElement(item), prop.name, value);
                     }, true)
                 } else {
-                    // Regular
-                    if (typeof(item.type) === 'function') {
-                        item.self[prop.name] = prop.value;
-                    } else {
-                        item.element.setAttribute(prop.name, prop.value);
+                    let name = prop.name;
+                    let value = prop.value;
+
+                    if (value.match(isScript)) {
+                        value = dynamicContent(value);
                     }
+
+                    setAttribute(getElement(item), prop.name, value);
                 }
             }
         }
@@ -916,9 +843,9 @@
                 // Create element
                 if (item.type === '#text') {
                     // Text node
-                    item.element = document.createTextNode(item.content || '');
+                    item.element = document.createTextNode(item.props[0].textContent);
                     // Check for dynamic content
-                    applyNodeContent(item);
+                    applyElementAttribute(item, item.props[0]);
                 } else {
                     // Apply attributes if they exist
                     if (item.props && ! Array.isArray(item.props)) {
@@ -937,7 +864,7 @@
                         // Mark this item as a loop
                         item.loop = true;
                     }
-
+console.log(item)
                     if (! item.type) {
                         item.type = 'root';
                     }
@@ -1073,7 +1000,7 @@
     }
 
     /**
-     * This allows to run inline script on legacy system. Inline script can lead to security issues so use carefully.
+     * This allows to run inline script on LEGACY system. Inline script can lead to security issues so use carefully.
      * @param {string} s string to function
      */
     const run = function(s) {
@@ -1277,6 +1204,9 @@
     // LemonadeJS object
     const L = {};
 
+    // Master container
+    let currentLemon = null;
+
     /**
      * Render a lemonade DOM element, method or class into a root DOM element
      * @param {function} component - LemonadeJS component or DOM created
@@ -1299,8 +1229,9 @@
 
         let lemon = {
             self: self,
-            events: [],
             ready: [],
+            change: [],
+            events: [],
             root: root,
         }
 
@@ -1311,10 +1242,13 @@
         let view;
         let result;
 
+
         // New self
         if (component === Basic) {
             view = spreadCloneChildren(item.children[0]);
         } else {
+            currentLemon = lemon;
+
             if (isClass(component)) {
                 self = new component(self);
                 view = self.render(item.template, item.children);
@@ -1322,6 +1256,8 @@
                 // Execute component
                 view = component.call(self, item.template, item.children);
             }
+
+            currentLemon = null;
         }
 
         // Values
@@ -1410,8 +1346,7 @@
             let props = Object.keys(lemon.events);
             if (props.length) {
                 for (let i = 0; i <props.length; i++) {
-                    let prop = props[i];
-                    trackProperty.call(lemon.self, prop, lemon.events[prop]);
+                    trackProperty(lemon, props[i]);
                 }
             }
         }
@@ -1638,28 +1573,55 @@
         return props.children;
     }
 
-    L.onload = function(self, event) {
-        onload.set(self, event);
+
+    const wrongLevel = 'Hooks must be called at the top level of your component';
+
+    L.onload = function(event) {
+        if (! currentLemon) {
+            createError(wrongLevel);
+        }
+        currentLemon.load = event;
     }
 
-    L.onchange = function(self, event) {
-        let events = onchange.get(self);
-        if (! events) {
-            events = [];
-            onchange.set(self, events);
+    L.onchange = function(event) {
+        if (! currentLemon) {
+            createError(wrongLevel);
         }
-        events.push(event);
+        currentLemon.change.push(event);
     }
 
-    L.state = function(self, def) {
+    const state = function() {}
 
-        let value = def;
+    state.prototype.toString = function() {
+        return this.value;
+    }
 
-        let setValue = (v) => {
-            value = v;
+    L.state = function(value, callback) {
+        if (! currentLemon) {
+            createError(wrongLevel);
         }
 
-        return [value, setValue];
+        const s = new state(value);
+        const events = [];
+
+        const setValue = (newValue) => {
+            value = typeof newValue === 'function' ? newValue(value) : newValue;
+            events.forEach(e => e(value));
+            callback?.(value);
+        };
+
+        Object.defineProperty(s, 'value', {
+            set: setValue,
+            get: () => value
+        });
+
+        Object.defineProperty(s, 'events', {
+            enumerable: false,
+            configurable: false,
+            get: () => events
+        });
+
+        return [s, setValue];
     }
 
     L.strict = false;
