@@ -19,10 +19,8 @@
      * Global control element
      */
     let R = {
-        queue: [],
-        container: {},
-        tracking: new Map,
         components: {},
+        container: new Map,
     };
 
     // Global LemonadeJS controllers
@@ -33,9 +31,6 @@
             R = document.lemonadejs;
         }
     }
-
-    const sugar = new Map;
-    const components = new Map;
 
     // Script expression inside LemonadeJS templates
     let isScript = /{{(.*?)}}/g;
@@ -53,18 +48,20 @@
      * @returns {string[]}
      */
     function extractTokens(content) {
-        const extractAction = function(find, replace) {
-            let tokens = content.match(find);
-            if (tokens) {
-                for (let i = 0; i < tokens.length; i++) {
-                    result.add(tokens[i].replace(replace, ''));
-                }
-            }
+        // Input validation
+        if (typeof content !== 'string') {
+            throw new TypeError('Content must be a string');
         }
-        let result = new Set;
-        extractAction(/self\.\w+\b(?!\.\w)/gm, /self\./)
-        extractAction(/this\.\w+\b(?!\.\w)/gm, /this\./)
-        return Array.from(result);
+        // Single regex pattern to match both 'self.' and 'this.' prefixed identifiers Negative lookahead (?!\.\w) prevents matching nested properties
+        const pattern = /(?:self|this)\.\w+\b(?!\.\w)/g;
+
+        // If no matches found, return empty array early
+        const matches = content.match(pattern);
+        if (!matches) {
+            return [];
+        }
+        // Create Set directly from matches array with map transform This is more efficient than adding items one by one
+        return [...new Set(matches.map(match => match.slice(match.indexOf('.') + 1)))];
     }
 
     /**
@@ -483,7 +480,7 @@
                     } else {
                         this.tag.attributeValue = char;
                     }
-                } else if (char.match(/\s/)) {
+                } else if (typeof(char) === 'string' && char.match(/\s/)) {
                     if (this.tag.attributeValue) {
                         this.action = 'attributeName';
                     }
@@ -493,7 +490,11 @@
                         this.action = 'attributeName';
                         actions.attributeName.call(this, char);
                     } else {
-                        this.tag.attributeValue += char;
+                        if (this.tag.attributeValue) {
+                            this.tag.attributeValue += char;
+                        } else {
+                            this.tag.attributeValue = char;
+                        }
                     }
                 }
             }
@@ -668,18 +669,22 @@
 
                 return text;
             } catch (e) {
-                createError('It was not possible to parse ', text, e)
             }
         }
 
         const applyElementAttribute = function(item, prop) {
             if (typeof(prop.expression) !== 'undefined') {
-                createEventsFromExpression(prop.expression, function() {
+                // Event to update the designed position
+                let event = function() {
                     // Extra the value from the template
                     let value = lemon.view(parseTemplate)[prop.index];
                     // Set attribute
                     setAttribute(getElement(item), prop.name, value);
-                }, true);
+                }
+                // Bind event to any tokens change
+                createEventsFromExpression(prop.expression, event, true);
+                // Register event for state changes
+                lemon.events[prop.index] = event;
             } else {
                 // Get the tokens should be updated to populate this attribute
                 let tokens = extractTokens(prop.value);
@@ -753,15 +758,21 @@
          * @param prop
          */
         const whenIsReady = function(item, prop) {
-            // When is ready
-            const method = lemon.self[prop];
+            let value = prop.value;
+            // If not a method, should be converted to a method
+            if (typeof(value) !== 'function') {
+                let t = extractFromPath.call(lemon.self, value);
+                if (t) {
+                    value = t;
+                }
+            }
             // Must be a function
-            if (typeof(method) === 'function') {
+            if (typeof(value) === 'function') {
                 lemon.ready.push(function() {
-                    method(getElement(item), lemon.self);
+                    value(getElement(item), lemon.self);
                 });
             } else {
-                createError(`:ready [${prop}] is not found in the object or it is not a function`)
+                createError(`:ready ${value} is not a function`)
             }
         }
 
@@ -838,6 +849,32 @@
             }
         }
 
+        const getAttributeName = function(prop) {
+            return prop[0] === ':' ? prop.substring(1) : prop.substring(3);
+        }
+
+        const getAttributeEvent = function(event) {
+            if (event.startsWith('on')) {
+                return event;
+            } else if (event.startsWith(':on')) {
+                return getAttributeName(event);
+            }
+        }
+
+        /**
+         * CHeck if the event name is a valid DOM event name
+         * @param element
+         * @param eventName
+         * @returns {boolean}
+         */
+        const applyEvent = function(element, eventName) {
+            if (isWebComponent(element)) {
+                const validEventPattern = /^on[a-z]+$/;
+                return validEventPattern.test(eventName);
+            }
+            return true;
+        }
+
         const createElements = function(item) {
             if (typeof(item) === 'object') {
                 // Create element
@@ -864,7 +901,7 @@
                         // Mark this item as a loop
                         item.loop = true;
                     }
-console.log(item)
+
                     if (! item.type) {
                         item.type = 'root';
                     }
@@ -872,8 +909,12 @@ console.log(item)
                     if (typeof(item.type) === 'string') {
                         if (item.type.match(/^[A-Z][a-zA-Z0-9\-]*$/g)) {
                             let controller = item.type.toUpperCase();
-                            if (typeof (R.components[controller]) === 'function') {
+                            if (typeof(R.components[controller]) === 'function') {
                                 item.type = R.components[controller];
+                            } else if (typeof (lemon.components[controller]) === 'function') {
+                                item.type = lemon.components[controller];
+                            } else {
+                                item.type = () => `<div></div>`;
                             }
                         }
                     }
@@ -893,33 +934,72 @@ console.log(item)
 
                     // Process attributes
                     if (item.props.length) {
-                        item.props.forEach(function(prop) {
-                            if (item.element && prop.name.startsWith('on')) {
-                                let method = prop.value;
-                                let event = prop.name.substring(2);
-                                item.element.addEventListener(event, method)
+                        item.props.forEach(function(prop, k) {
+                            // If the property is an event
+                            let event = getAttributeEvent(prop.name);
+                            // When event for a DOM
+                            if (event) {
+                                // Element
+                                let element = item.element;
+                                // Value
+                                let value = prop.value;
+                                if (value) {
+                                    let handler = null; // Reset handler for each iteration
+                                    if (typeof (value) === 'function') {
+                                        handler = value;
+                                    } else {
+                                        let t = extractFromPath.call(lemon.self, value);
+                                        if (t) {
+                                            if (typeof (t) === 'function') {
+                                                prop.value = handler = t;
+                                            }
+                                        }
+                                    }
+                                    // When the element is a DOM
+                                    if (isDOM(element) && applyEvent(element, prop.name)) {
+                                        event = event.substring(2);
+                                        // Bind event
+                                        if (typeof(handler) === 'function') {
+                                            element.addEventListener(event, function (e) {
+                                                handler.call(element, e, lemon.self);
+                                            });
+                                        } else {
+                                            // Legacy compatibility. Inline scripting is non-Compliance with Content Security Policy (CSP)
+                                            element.addEventListener(event, function (e) {
+                                                Function('self', 'e', value).call(element, lemon.self, e);
+                                            });
+                                        }
+                                    } else {
+                                        item.self[event] = handler || value;
+                                    }
+                                }
                             } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
                                 // Create a reference to the DOM element
                                 let property = prop.expression || prop.value;
-                                // Get the attribute name
-                                property = extractTokens(property);
-                                // Reference name is found
-                                if (property.length === 1) {
-                                    // Whe need the entry
-                                    property = property[0];
-                                    // Special lemonade attribute name
-                                    let attributeName = prop.name[0] === ':' ? prop.name.substring(1) : prop.name.substring(3);
-                                    // Is that a special event
-                                    if (attributeName === 'ref') {
-                                        createReference(item, property)
-                                    } else if (attributeName === 'bind') {
-                                        applyBindHandler(item, property);
-                                    } else if (attributeName === 'ready') {
-                                        whenIsReady(item, property);
-                                    } else if (attributeName === 'loop') {
-                                        registerLoop(item, property);
+                                // Special lemonade attribute name
+                                let attrName = getAttributeName(prop.name);
+                                // Special properties bound to the self
+                                if (attrName === 'ready') {
+                                    whenIsReady(item, prop);
+                                  } else {
+                                    // Get the attribute name
+                                    property = extractTokens(property);
+                                    // Reference name is found
+                                    if (property.length === 1) {
+                                        // Whe need the entry
+                                        property = property[0];
+                                        // Is that a special event
+                                        if (attrName === 'ref') {
+                                            createReference(item, property)
+                                        } else if (attrName === 'bind') {
+                                            applyBindHandler(item, property);
+                                        } else if (attrName === 'loop') {
+                                            registerLoop(item, property);
+                                        } else {
+                                            setDynamicValue(item, property, attrName);
+                                        }
                                     } else {
-                                        setDynamicValue(item, property, attributeName);
+                                        setAttribute(getElement(item), attrName, castProperty(prop.value));
                                     }
                                 }
                             } else {
@@ -941,7 +1021,11 @@ console.log(item)
 
                         // Create all children
                         if (item.children) {
-                            appendChildren(item.element, item.children);
+                            let root = item.element;
+                            if (item.self && item.self.root) {
+                                root = item.self.root;
+                            }
+                            appendChildren(root, item.children);
                         }
                     }
                 }
@@ -1000,6 +1084,40 @@ console.log(item)
     }
 
     /**
+     * Cast the value of an attribute
+     */
+    const castProperty = function(attr) {
+        // Parse type
+        try {
+            if (typeof(attr) === 'string' && attr) {
+                // Remove any white spaces
+                attr = attr.trim();
+                if (attr === 'true') {
+                    return true;
+                } else if (attr === 'false') {
+                    return false;
+                } else if (! isNaN(attr)) {
+                    return Number(attr);
+                } else {
+                    let firstChar = attr[0];
+                    if (firstChar === '{' || firstChar === '[') {
+                        if (attr.slice(-1) === '}' || attr.slice(-1) === ']') {
+                            return JSON.parse(attr);
+                        }
+                    } else if (attr.startsWith('self.') || attr.startsWith('this.')) {
+                        let v = extractFromPath.call(this, attr);
+                        if (typeof(v) !== 'undefined') {
+                            return v;
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+
+        return attr;
+    }
+
+    /**
      * This allows to run inline script on LEGACY system. Inline script can lead to security issues so use carefully.
      * @param {string} s string to function
      */
@@ -1014,6 +1132,15 @@ console.log(item)
      */
     const isDOM = function(o) {
         return (o instanceof HTMLElement || o instanceof Element || o instanceof DocumentFragment);
+    }
+
+    /**
+     * Is a web component
+     * @param {HTMLElement} o
+     * @return {boolean}
+     */
+    const isWebComponent = function(o) {
+        return o.tagName.includes('-');
     }
 
     /**
@@ -1078,6 +1205,9 @@ console.log(item)
         // When the value is a function
         if (isDOM(e) && typeof(value) === 'function') {
             value = value();
+        }
+        if (typeof(value) === 'undefined') {
+            value = '';
         }
 
         if (attribute === 'value') {
@@ -1191,14 +1321,27 @@ console.log(item)
             return element.map(item => spreadCloneChildren(item));
         }
 
-        // Create new object with spread operator
-        return {
-            ...element,
-            // Only recursively clone the children property if it exists
-            ...(element.children && {
-                children: spreadCloneChildren(element.children)
-            })
-        };
+        // Create new object
+        const cloned = {};
+
+        // Clone each property
+        for (const key in element) {
+            if (key === 'children') {
+                // Handle children specially as before
+                cloned.children = element.children ? spreadCloneChildren(element.children) : undefined;
+            } else if (key === 'props') {
+                // Deep clone props array
+                cloned.props = element.props.map(prop => ({
+                    ...prop,
+                    value: prop.value // If value is a function, it will maintain the reference which is what we want
+                }));
+            } else {
+                // Clone other properties
+                cloned[key] = element[key];
+            }
+        }
+
+        return cloned;
     }
 
     // LemonadeJS object
@@ -1216,7 +1359,6 @@ console.log(item)
      * @return {HTMLElement|boolean} o
      */
     L.render = function(component, root, self, item) {
-
         if (typeof(component) !== 'function') {
             console.error('Component is not a function');
             return false;
@@ -1232,6 +1374,7 @@ console.log(item)
             ready: [],
             change: [],
             events: [],
+            components: {},
             root: root,
         }
 
@@ -1242,7 +1385,6 @@ console.log(item)
         let view;
         let result;
 
-
         // New self
         if (component === Basic) {
             view = spreadCloneChildren(item.children[0]);
@@ -1251,10 +1393,10 @@ console.log(item)
 
             if (isClass(component)) {
                 self = new component(self);
-                view = self.render(item.template, item.children);
+                view = self.render(item.children);
             } else {
                 // Execute component
-                view = component.call(self, item.template, item.children);
+                view = component.call(self, item.children);
             }
 
             currentLemon = null;
@@ -1265,6 +1407,8 @@ console.log(item)
         // Process return
         if (typeof(view) === 'function') {
             values = view(parseTemplate);
+            // Curren values
+            lemon.values = values;
             // A render template to be executed
             lemon.view = view;
             // Template from the method
@@ -1362,8 +1506,15 @@ console.log(item)
     /**
      * Deprecated
      * @param {string} template
+     * @param {object?} s (self)
+     * @param {object?} components
      */
-    L.element = function(template) {
+    L.element = function(template, s, components) {
+        if (currentLemon && components) {
+            for (const key in components) {
+                currentLemon.components[key.toUpperCase()] = components[key];
+            }
+        }
         return template;
     }
 
@@ -1421,7 +1572,7 @@ console.log(item)
      * @returns {Object | Function} - registered element
      */
     L.get = function(name) {
-        return sugar.get(name);
+        return R.container.get(name);
     }
 
     /**
@@ -1445,7 +1596,7 @@ console.log(item)
             }
         }
         // Save to the sugar container
-        sugar.set(name, e);
+        R.container.set(name, e);
     }
 
     /**
@@ -1455,7 +1606,7 @@ console.log(item)
      */
     L.dispatch = function(name, data) {
         // Get from the container
-        let e = sugar.get(name);
+        let e = R.container.get(name);
         // Confirm that the alias is a function
         if (typeof(e) === 'function') {
             // Dispatch the data to the function
@@ -1510,12 +1661,17 @@ console.log(item)
         const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
-        if (customElements.get(componentName)) {
-            console.warn(`${componentName} is already defined.`);
-        } else {
+        if (! customElements.get(componentName)) {
             class Component extends HTMLElement {
                 constructor() {
                     super();
+                }
+
+                initSettings(props) {
+                    // Copy all values to the object
+                    if (typeof(props) === 'object') {
+                        L.setProperties.call(this, props, true);
+                    }
                 }
 
                 connectedCallback() {
@@ -1529,6 +1685,7 @@ console.log(item)
                         let props = getAttributes.call(self, true);
                         // Copy all values to the object
                         L.setProperties.call(self, props, true);
+                        console.log(self);
                         // Render
                         if (options && options.applyOnly === true) {
                             // Merge component
@@ -1543,7 +1700,7 @@ console.log(item)
                                 this.shadowRoot.appendChild(root);
                             }
                             // Give the browser time to calculate all width and heights
-                            L.render(handler, root, self, '');
+                            L.render(handler, root, self);
                         }
                     }
 
@@ -1573,7 +1730,6 @@ console.log(item)
         return props.children;
     }
 
-
     const wrongLevel = 'Hooks must be called at the top level of your component';
 
     L.onload = function(event) {
@@ -1602,23 +1758,32 @@ console.log(item)
         }
 
         const s = new state(value);
-        const events = [];
+        const lemon = currentLemon;
 
         const setValue = (newValue) => {
             value = typeof newValue === 'function' ? newValue(value) : newValue;
-            events.forEach(e => e(value));
+
+            // Values from the view
+            let values = lemon.view(parseTemplate);
+            if (values && values.length) {
+                values.forEach((v, k) => {
+                    if (v !== lemon.values[k]) {
+                        // Update current value
+                        lemon.values[k] = v;
+                        // Trigger state events
+                        if (typeof(lemon.events[k]) === 'function') {
+                            lemon.events[k]();
+                        }
+                    }
+                });
+            }
+
             callback?.(value);
-        };
+        }
 
         Object.defineProperty(s, 'value', {
             set: setValue,
             get: () => value
-        });
-
-        Object.defineProperty(s, 'events', {
-            enumerable: false,
-            configurable: false,
-            get: () => events
         });
 
         return [s, setValue];
