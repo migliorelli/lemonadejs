@@ -97,18 +97,16 @@
                         });
                     }
                     // Refresh bound elements
-                    if (v !== oldValue) {
-                        if (change && change.length) {
-                            change.forEach((action) => {
-                                if (typeof (action) === 'function') {
-                                    action.call(s, prop, oldValue, v);
-                                }
-                            })
-                        }
-                        // Native onchange
-                        if (typeof(s.onchange) === 'function') {
-                            s.onchange.call(s, prop, oldValue, v);
-                        }
+                    if (change && change.length) {
+                        change.forEach((action) => {
+                            if (typeof (action) === 'function') {
+                                action.call(s, prop, oldValue, v);
+                            }
+                        })
+                    }
+                    // Native onchange
+                    if (typeof(s.onchange) === 'function') {
+                        s.onchange.call(s, prop, oldValue, v);
                     }
                 },
                 get: function () {
@@ -151,8 +149,12 @@
      * Process the onload methods
      */
     const processOnload = function(lemon) {
+        let root = lemon.tree.element;
+        if (root.tagName === 'ROOT') {
+            root = lemon.root;
+        }
         // Check if the element is appended to the DOM
-        if (isAppended(lemon.tree.element)) {
+        if (isAppended(root)) {
             let s = lemon.self;
             // Ready event
             while (lemon.ready.length) {
@@ -531,7 +533,7 @@
         // Control the LemonadeJS native references
         let referenceControl = null;
 
-        const result = { type: 'root' };
+        const result = { type: 'template' };
         const control = {
             current: result,
             action: 'text',
@@ -854,8 +856,9 @@
         }
 
         const getAttributeEvent = function(event) {
+            event = event.toLowerCase();
             if (event.startsWith('on')) {
-                return event;
+                return event.toLowerCase();
             } else if (event.startsWith(':on')) {
                 return getAttributeName(event);
             }
@@ -867,12 +870,9 @@
          * @param eventName
          * @returns {boolean}
          */
-        const applyEvent = function(element, eventName) {
-            if (isWebComponent(element)) {
-                const validEventPattern = /^on[a-z]+$/;
-                return validEventPattern.test(eventName);
-            }
-            return true;
+        const isValidEventName = function(element, eventName) {
+            const validEventPattern = /^on[a-z]+$/;
+            return validEventPattern.test(eventName);
         }
 
         const createElements = function(item) {
@@ -914,7 +914,6 @@
                             } else if (typeof (lemon.components[controller]) === 'function') {
                                 item.type = lemon.components[controller];
                             } else {
-                                item.type = () => `<div></div>`;
                             }
                         }
                     }
@@ -956,18 +955,25 @@
                                         }
                                     }
                                     // When the element is a DOM
-                                    if (isDOM(element) && applyEvent(element, prop.name)) {
-                                        event = event.substring(2);
+                                    if (isDOM(element)) {
+                                        // Create the event handler
+                                        let eventHandler;
                                         // Bind event
                                         if (typeof(handler) === 'function') {
-                                            element.addEventListener(event, function (e) {
+                                            eventHandler = function(e) {
                                                 handler.call(element, e, lemon.self);
-                                            });
+                                            }
                                         } else {
                                             // Legacy compatibility. Inline scripting is non-Compliance with Content Security Policy (CSP)
-                                            element.addEventListener(event, function (e) {
+                                            eventHandler = function (e) {
                                                 Function('self', 'e', value).call(element, lemon.self, e);
-                                            });
+                                            }
+                                        }
+
+                                        if (isValidEventName(element, prop.name)) {
+                                            element.addEventListener(event.substring(2), eventHandler);
+                                        } else {
+                                            element[event] = eventHandler;
                                         }
                                     } else {
                                         item.self[event] = handler || value;
@@ -1013,7 +1019,7 @@
                         if (typeof(item.type) === 'function') {
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
-                            // Register
+                            // TODO: review this rule
                             if (! L.strict) {
                                 register(item.self, 'parent', lemon.self);
                             }
@@ -1022,8 +1028,8 @@
                         // Create all children
                         if (item.children) {
                             let root = item.element;
-                            if (item.self && item.self.root) {
-                                root = item.self.root;
+                            if (item.self && item.self.settings && typeof(item.self.settings.getRoot) === 'function') {
+                                root = item.self.settings.getRoot();
                             }
                             appendChildren(root, item.children);
                         }
@@ -1036,6 +1042,53 @@
         createElements(lemon.tree);
 
         return lemon.tree.element;
+    }
+
+    const nodeToXml = function(node) {
+        function buildElement(node) {
+            // Handle text nodes
+            if (node.type === '#text') {
+                // Check for textContent in props
+                const textContentProp = node.props?.find(prop => prop.name === 'textContent');
+                if (textContentProp) {
+                    return escapeXml(textContentProp.value);
+                }
+                return '';
+            }
+
+            // Handle element nodes
+            const attributes = node.props?.length
+                ? ' ' + node.props
+                .map(attr => `${attr.name}="${escapeXml(attr.value)}"`)
+                .join(' ')
+                : '';
+
+            // If no children, create self-closing tag
+            if (!node.children?.length) {
+                return `<${node.type}${attributes}/>`;
+            }
+
+            // Process children
+            const childrenXml = node.children
+                .map(child => buildElement(child))
+                .join('');
+
+            // Return complete element
+            return `<${node.type}${attributes}>${childrenXml}</${node.type}>`;
+        }
+
+        // Escape special XML characters
+        function escapeXml(text) {
+            if (text === undefined || text === null) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        return buildElement(node);
     }
 
     /**
@@ -1135,15 +1188,6 @@
     }
 
     /**
-     * Is a web component
-     * @param {HTMLElement} o
-     * @return {boolean}
-     */
-    const isWebComponent = function(o) {
-        return o.tagName.includes('-');
-    }
-
-    /**
      * Check if the method is a method or a class
      * @param {function} f
      * @return {boolean}
@@ -1202,11 +1246,10 @@
      * @param {any} value
      */
     const setAttribute = function(e, attribute, value) {
-        // When the value is a function
-        if (isDOM(e) && typeof(value) === 'function') {
-            value = value();
-        }
-        if (typeof(value) === 'undefined') {
+        // Handle state
+        if (value instanceof state) {
+            value = value.value;
+        } else if (typeof(value) === 'undefined') {
             value = '';
         }
 
@@ -1243,7 +1286,7 @@
             if (value) {
                 e.setAttribute(attribute, value);
             }
-        } else if (typeof(e[attribute]) !== 'undefined' || typeof(value) == 'object') {
+        } else if (typeof(e[attribute]) !== 'undefined' || typeof(value) === 'object' || typeof(value) === 'function') {
             e[attribute] = value;
         } else {
             if (isDOM(e)) {
@@ -1310,7 +1353,7 @@
         return args;
     }
 
-    function spreadCloneChildren(element) {
+    function cloneChildren(element) {
         // Base case: if element is null/undefined or not an object, return as is
         if (!element || typeof element !== 'object') {
             return element;
@@ -1318,7 +1361,7 @@
 
         // Handle arrays
         if (Array.isArray(element)) {
-            return element.map(item => spreadCloneChildren(item));
+            return element.map(item => cloneChildren(item));
         }
 
         // Create new object
@@ -1328,7 +1371,7 @@
         for (const key in element) {
             if (key === 'children') {
                 // Handle children specially as before
-                cloned.children = element.children ? spreadCloneChildren(element.children) : undefined;
+                cloned.children = element.children ? cloneChildren(element.children) : undefined;
             } else if (key === 'props') {
                 // Deep clone props array
                 cloned.props = element.props.map(prop => ({
@@ -1387,7 +1430,7 @@
 
         // New self
         if (component === Basic) {
-            view = spreadCloneChildren(item.children[0]);
+            view = cloneChildren(item.children[0]);
         } else {
             currentLemon = lemon;
 
@@ -1503,6 +1546,14 @@
         return element;
     }
 
+    const registerComponents = function(components) {
+        if (components && currentLemon) {
+            for (const key in components) {
+                currentLemon.components[key.toUpperCase()] = components[key];
+            }
+        }
+    }
+
     /**
      * Deprecated
      * @param {string} template
@@ -1510,11 +1561,7 @@
      * @param {object?} components
      */
     L.element = function(template, s, components) {
-        if (currentLemon && components) {
-            for (const key in components) {
-                currentLemon.components[key.toUpperCase()] = components[key];
-            }
-        }
+        registerComponents(components);
         return template;
     }
 
@@ -1525,6 +1572,14 @@
      * @param {object?} components - object with component declarations
      */
     L.apply = function(el, s, components) {
+        registerComponents(components);
+
+        let template = el.innerHTML;
+        el.textContent = '';
+        let component = function() {
+            return `<>${template}</>`;
+        }
+        return L.render(component,el,s);
     }
 
     /**
@@ -1641,8 +1696,6 @@
         }
     }
 
-    L.path = extractFromPath;
-
     /**
      * Create a Web Component
      * @param {string} name - web component name
@@ -1685,7 +1738,6 @@
                         let props = getAttributes.call(self, true);
                         // Copy all values to the object
                         L.setProperties.call(self, props, true);
-                        console.log(self);
                         // Render
                         if (options && options.applyOnly === true) {
                             // Merge component
@@ -1705,6 +1757,7 @@
                     }
 
                     requestAnimationFrame(() => {
+                        // Event
                         if (typeof(self.onconnect) === 'function') {
                             self.onconnect(self, state);
                         }
@@ -1749,16 +1802,29 @@
     const state = function() {}
 
     state.prototype.toString = function() {
+        return this.value.toString();
+    }
+
+    state.prototype.valueOf = function() {
         return this.value;
     }
 
+    state.prototype[Symbol.toPrimitive] = function(hint) {
+        if (hint === 'string') {
+            return this.value.toString();
+        }
+        return this.value;
+    }
+
+    // TODO: objetos and arrays. Manter a verificacao se e state para sempre atualizar quando o setValue for chamado. Olhando no viewport deve ser o ultimo rescurso.
     L.state = function(value, callback) {
         if (! currentLemon) {
             createError(wrongLevel);
         }
 
-        const s = new state(value);
         const lemon = currentLemon;
+
+        const s = new state();
 
         const setValue = (newValue) => {
             value = typeof newValue === 'function' ? newValue(value) : newValue;
@@ -1767,7 +1833,10 @@
             let values = lemon.view(parseTemplate);
             if (values && values.length) {
                 values.forEach((v, k) => {
-                    if (v !== lemon.values[k]) {
+                    // If the value isf rom a state
+                    let test = v instanceof state ? v.value : v;
+                    // Compare if the previous value
+                    if (test !== lemon.values[k]) {
                         // Update current value
                         lemon.values[k] = v;
                         // Trigger state events
@@ -1777,7 +1846,6 @@
                     }
                 });
             }
-
             callback?.(value);
         }
 
@@ -1790,6 +1858,13 @@
     }
 
     L.strict = false;
+
+    L.helpers = {
+        path: extractFromPath,
+        getTemplate: function(node) {
+            return nodeToXml(node)
+        }
+    }
 
     return L;
 })));

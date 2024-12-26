@@ -162,7 +162,7 @@ describe('Properties', () => {
             }
 
             // This is not inline scripting and can be used with CSP.
-            return `<input type="text" test="{{self.value}} * 2 = {{self.total}}" value="{{self.total}}" />`;
+            return `<input type="text" test="{{self.value}} * 2 = {{self.total}}" value="{{self.total()}}" />`;
         }
 
         // Render the component and assert the return
