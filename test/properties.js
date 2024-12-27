@@ -3,14 +3,19 @@ describe('Properties', () => {
     it('Tracking sub-level object properties', function() {
         // Lemonade Component
         function Component() {
-            let self = this;
-            self.test = {
+            this.test = {
                 value: 123,
             }
+            const update = () => {
+                this.test.value++;
+                // Will force the refresh to all the nodes tha has references for test
+                this.refresh('test');
+            }
+
             // Title and year are declared in the parent template
             return (render) => render`<div>
-                <h1 :ref="self.title">{{self.test.value}}</h1>
-                <input type="button" onclick="${()=>self.test.value++}" :ref="self.button" />
+                <h1>${this.test.value}</h1>
+                <input type="button" onclick="${update}" :ref="${this.button}" />
             </div>`;
         }
 
@@ -20,7 +25,7 @@ describe('Properties', () => {
             // Simulate the click in the button
             self.button.click();
             // Return the value
-            return self.title.textContent;
+            return self.el.textContent;
         })
     });
 

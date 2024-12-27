@@ -116,7 +116,7 @@ describe('General', () => {
         // Render the component and assert the return
         return render(Component).assert('test', function () {
             let self = this;
-            return self.el.innerText;
+            return self.el.textContent;
         })
     });
 });

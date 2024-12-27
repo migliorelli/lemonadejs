@@ -53,7 +53,8 @@
             throw new TypeError('Content must be a string');
         }
         // Single regex pattern to match both 'self.' and 'this.' prefixed identifiers Negative lookahead (?!\.\w) prevents matching nested properties
-        const pattern = /(?:self|this)\.\w+\b(?!\.\w)/g;
+        //const pattern =  /(?:self|this)\.\w+\b(?!\.\w)/g;
+        const pattern = /(?<=(?:this|self)\.)[a-zA-Z_]\w*/gm
 
         // If no matches found, return empty array early
         const matches = content.match(pattern);
@@ -1498,7 +1499,11 @@
                 // Refresh
                 register(lemon.self, 'refresh', (prop) => {
                     if (prop) {
-                        lemon.self[prop] = lemon.self[prop];
+                        if (prop === true) {
+                            runViewValues(lemon);
+                        } else {
+                            lemon.self[prop] = lemon.self[prop];
+                        }
                     } else {
                         let e = L.render(...arguments);
                         if (! root) {
@@ -1817,36 +1822,43 @@
         return this.value;
     }
 
-    // TODO: objetos and arrays. Manter a verificacao se e state para sempre atualizar quando o setValue for chamado. Olhando no viewport deve ser o ultimo rescurso.
+    /**
+     * Run view values
+     * @param lemon
+     */
+    const runViewValues = function(lemon) {
+        let values = lemon.view(parseTemplate);
+        if (values && values.length) {
+            values.forEach((v, k) => {
+                // If the value isf rom a state
+                let test = v instanceof state ? v.value : v;
+                // Compare if the previous value
+                if (test !== lemon.values[k]) {
+                    // Update current value
+                    lemon.values[k] = v;
+                    // Trigger state events
+                    if (typeof(lemon.events[k]) === 'function') {
+                        lemon.events[k]();
+                    }
+                }
+            });
+        }
+    }
+
+    // TODO: Proxy for Objects and Arrays
     L.state = function(value, callback) {
         if (! currentLemon) {
             createError(wrongLevel);
         }
 
-        const lemon = currentLemon;
-
         const s = new state();
 
         const setValue = (newValue) => {
+            // Update original value
             value = typeof newValue === 'function' ? newValue(value) : newValue;
-
             // Values from the view
-            let values = lemon.view(parseTemplate);
-            if (values && values.length) {
-                values.forEach((v, k) => {
-                    // If the value isf rom a state
-                    let test = v instanceof state ? v.value : v;
-                    // Compare if the previous value
-                    if (test !== lemon.values[k]) {
-                        // Update current value
-                        lemon.values[k] = v;
-                        // Trigger state events
-                        if (typeof(lemon.events[k]) === 'function') {
-                            lemon.events[k]();
-                        }
-                    }
-                });
-            }
+            runViewValues(currentLemon);
+            // Call back
             callback?.(value);
         }
 
