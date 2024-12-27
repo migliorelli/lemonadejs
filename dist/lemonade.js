@@ -1,7 +1,7 @@
 /**
  * LemonadeJS v5
  *
- * Website: https://lemonadejs.net
+ * Website: https://lemonadejs.com
  * Description: Create amazing web based reusable components.
  *
  * This software is distributed under MIT License
@@ -699,9 +699,7 @@
                         setAttribute(getElement(item), prop.name, value);
                     }, true)
                 } else {
-                    let name = prop.name;
                     let value = prop.value;
-
                     if (value.match(isScript)) {
                         value = dynamicContent(value);
                     }
@@ -1020,9 +1018,9 @@
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
                             // TODO: review this rule
-                            if (! L.strict) {
-                                register(item.self, 'parent', lemon.self);
-                            }
+                            //if (! L.strict) {
+                            //    register(item.self, 'parent', lemon.self);
+                            //}
                         }
 
                         // Create all children
@@ -1423,6 +1421,10 @@
 
         if (! item) {
             item = {};
+        } else if (typeof(item) === 'string') {
+            item = {
+                children: item,
+            }
         }
 
         let view;
@@ -1572,14 +1574,13 @@
      * @param {object?} components - object with component declarations
      */
     L.apply = function(el, s, components) {
-        registerComponents(components);
-
         let template = el.innerHTML;
         el.textContent = '';
-        let component = function() {
+        let Component = function() {
+            registerComponents(components);
             return `<>${template}</>`;
         }
-        return L.render(component,el,s);
+        return L.render(Component,el,s);
     }
 
     /**
@@ -1857,12 +1858,15 @@
         return [s, setValue];
     }
 
-    L.strict = false;
-
     L.helpers = {
         path: extractFromPath,
         getTemplate: function(node) {
             return nodeToXml(node)
+        },
+        properties: {
+            get: L.getProperties,
+            set: L.setProperties,
+            reset: L.resetProperties,
         }
     }
 
