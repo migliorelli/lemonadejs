@@ -146,12 +146,30 @@
 
     const elementNotReady = [];
 
+    function transformDom(parent) {
+        // Go down until no children found
+        if (parent.children.length) {
+            for (let child of parent.children) {
+                transformDom(child);
+            }
+        }
+
+        // Coming back up
+        if (parent.tagName.toLowerCase() === 'root') {
+            const parentElement = parent.parentElement;
+            while (parent.firstChild) {
+                parentElement.insertBefore(parent.firstChild, parent);
+            }
+            parentElement.removeChild(parent);
+        }
+    }
+
     /**
      * Process the onload methods
      */
     const processOnload = function(lemon) {
         let root = lemon.tree.element;
-        if (root.tagName === 'ROOT') {
+        if (root.tagName === 'ROOT' && lemon.root) {
             root = lemon.root;
         }
         // Check if the element is appended to the DOM
@@ -179,6 +197,10 @@
                 // Process all items
                 for (let i = 0; i < totalOfItems; i++) {
                     processOnload(items[i]);
+                }
+                // Remove <root>
+                if (! elementNotReady.length) {
+                    transformDom(root);
                 }
             }
         } else {
@@ -1018,10 +1040,6 @@
                         if (typeof(item.type) === 'function') {
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
-                            // TODO: review this rule
-                            //if (! L.strict) {
-                            //    register(item.self, 'parent', lemon.self);
-                            //}
                         }
 
                         // Create all children
@@ -1476,6 +1494,10 @@
 
         // Process the result
         if (result) {
+            if (root) {
+                result.parent.element = root;
+            }
+
             // Get the HTML virtual DOM representation
             lemon.tree = result;
 
@@ -1805,23 +1827,6 @@
         currentLemon.change.push(event);
     }
 
-    const state = function() {}
-
-    state.prototype.toString = function() {
-        return this.value.toString();
-    }
-
-    state.prototype.valueOf = function() {
-        return this.value;
-    }
-
-    state.prototype[Symbol.toPrimitive] = function(hint) {
-        if (hint === 'string') {
-            return this.value.toString();
-        }
-        return this.value;
-    }
-
     /**
      * Run view values
      * @param lemon
@@ -1845,23 +1850,43 @@
         }
     }
 
+    const state = function() {}
+
+    state.prototype.toString = function() {
+        return this.value.toString();
+    }
+
+    state.prototype.valueOf = function() {
+        return this.value;
+    }
+
+    state.prototype[Symbol.toPrimitive] = function(hint) {
+        if (hint === 'string') {
+            return this.value.toString();
+        }
+        return this.value;
+    }
+
     // TODO: Proxy for Objects and Arrays
     L.state = function(value, callback) {
         if (! currentLemon) {
             createError(wrongLevel);
         }
-
+        // Keep lemon local
+        const lemon = currentLemon;
+        // Create state container
         const s = new state();
-
+        // Create method to update the state
         const setValue = (newValue) => {
+            let oldValue = value;
             // Update original value
             value = typeof newValue === 'function' ? newValue(value) : newValue;
             // Values from the view
-            runViewValues(currentLemon);
+            runViewValues(lemon);
             // Call back
-            callback?.(value);
+            callback?.(value, oldValue);
         }
-
+        // Make the value attribute dynamic
         Object.defineProperty(s, 'value', {
             set: setValue,
             get: () => value
