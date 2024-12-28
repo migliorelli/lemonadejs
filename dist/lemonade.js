@@ -1586,6 +1586,11 @@
      * @param {object?} components
      */
     L.element = function(template, s, components) {
+        if (currentLemon && s && typeof(s) === 'object') {
+            if (s !== currentLemon.self) {
+                currentLemon.self = s;
+            }
+        }
         registerComponents(components);
         return template;
     }
