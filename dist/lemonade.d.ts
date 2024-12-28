@@ -31,35 +31,34 @@ declare namespace lemonade {
     }
 
     type FunctionComponent = (this: {
-        /**
-         * Root element of the component
-         */
         el: HTMLElement;
-        /**
-         * Parent component self
-         */
-        parent: FunctionComponent;
-        /**
-         * Refresh a property that is an array or the entire component.
-         * @param target
-         */
-        refresh: (target?: string) => void
+        refresh: (target?: string) => void;
         [key: string]: any;
-    } & ComponentEvents) => void
+    }) =>
+        | string
+        | ((render: {
+        (template: TemplateStringsArray, ...values: any[]): HTMLElement;
+        (template: string): HTMLElement;
+    }) => HTMLElement);
+
+    // Define the callback function type
+    type StateCallback<T> = (newValue: T, oldValue: T) => void;
 
     class component {
         constructor(s?: Record<string, any>);
         // Root DOM element
         el: HTMLElement;
-        // Self which called the child component
-        parent: FunctionComponent;
         // Refresh an array or the entire component
         refresh: (target?: string) => void
         [key: string]: any;
     }
 
+    // State function with overloads to handle both cases
+    function state<T>(initialValue: T): [T, (value: T) => void];
+    function state<T>(initialValue: T, callback: StateCallback<T>): [T, (value: T) => void];
+
     /**
-     * Create a LemonadeJS
+     * Create a LemonadeJS - Depraceted
      * @param {string} template to create the element
      * @param {Object} self object to control the component
      * @param {Object} components that would be used in the template
@@ -75,7 +74,7 @@ declare namespace lemonade {
      * @param {string?} template template to be passed to component
      * @return {HTMLElement} Result DOM element, ready to be append to the DOM
      */
-    function render(component: Function, root: HTMLElement, self?: Object, template?: String) : false | Element | Document | DocumentFragment;
+    function render(component: Function, root: HTMLElement, self?: Object) : Element;
 
     /**
      * Bind a self to an existing appended DOM element
