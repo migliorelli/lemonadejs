@@ -146,31 +146,13 @@
 
     const elementNotReady = [];
 
-    function transformDom(parent) {
-        // Go down until no children found
-        if (parent.children.length) {
-            for (let child of parent.children) {
-                transformDom(child);
-            }
-        }
-
-        // Coming back up
-        if (parent.tagName.toLowerCase() === 'root') {
-            const parentElement = parent.parentElement;
-            while (parent.firstChild) {
-                parentElement.insertBefore(parent.firstChild, parent);
-            }
-            parentElement.removeChild(parent);
-        }
-    }
-
     /**
      * Process the onload methods
      */
     const processOnload = function(lemon) {
         let root = lemon.tree.element;
-        if (root.tagName === 'ROOT' && lemon.root) {
-            root = lemon.root;
+        if (root.tagName === 'ROOT' && lemon.elements) {
+            root = lemon.elements[0];
         }
         // Check if the element is appended to the DOM
         if (isAppended(root)) {
@@ -197,10 +179,6 @@
                 // Process all items
                 for (let i = 0; i < totalOfItems; i++) {
                     processOnload(items[i]);
-                }
-                // Remove <root>
-                if (! elementNotReady.length) {
-                    transformDom(root);
                 }
             }
         } else {
@@ -866,7 +844,13 @@
                     if (typeof(child) === 'string') {
                         container.appendChild(document.createTextNode(child));
                     } else if (child.element) {
-                        container.appendChild(child.element);
+                        if (child.element.tagName === 'ROOT') {
+                            while (child.element.firstChild) {
+                                container.appendChild(child.element.firstChild);
+                            }
+                        } else {
+                          container.appendChild(child.element);
+                        }
                     }
                 });
             }
@@ -1429,13 +1413,17 @@
             self = {};
         }
 
+        // Arguments
+        let args = Array.from(arguments);
+
+        // Lemonade component object
         let lemon = {
             self: self,
             ready: [],
             change: [],
             events: [],
             components: {},
-            root: root,
+            elements: [],
         }
 
         if (! item) {
@@ -1494,10 +1482,6 @@
 
         // Process the result
         if (result) {
-            if (root) {
-                result.parent.element = root;
-            }
-
             // Get the HTML virtual DOM representation
             lemon.tree = result;
 
@@ -1505,14 +1489,14 @@
             element = generateHTML(lemon);
             if (element) {
                 // Parents
-                let elements = [];
+                lemon.elements = [];
                 // Append parents
                 if (element.tagName === 'ROOT') {
                     element.childNodes.forEach((e) => {
-                        elements.push(e);
+                        lemon.elements.push(e);
                     });
                 } else {
-                    elements.push(element);
+                    lemon.elements.push(element);
                 }
 
                 // Register element when is not registered inside the component
@@ -1527,20 +1511,32 @@
                             lemon.self[prop] = lemon.self[prop];
                         }
                     } else {
-                        let e = L.render(...arguments);
-                        if (! root) {
-                            let root = elements[0];
-                            root.parentNode.insertBefore(e, root);
-                        }
-                        elements.forEach((e) => {
+                        // Do not add in the same root
+                        let div = document.createElement('div');
+                        // Append temporary DIV to the same position
+                        lemon.elements[0].parentNode.insertBefore(div, lemon.elements[0]);
+                        // Remove the old elements
+                        lemon.elements.forEach((e) => {
                             e.remove();
                         });
+                        // Root element
+                        args[1] = div;
+                        // Create a new component
+                        let e = L.render(...args);
+                        // Append elements in the same position in the DOM tree
+                        while (div.firstChild) {
+                            div.parentNode.insertBefore(div.firstChild, div);
+                        }
+                        // Remove DIV
+                        div.remove();
+                        // Object not in use
+                        lemon = null;
                     }
                 });
 
                 // Append element to the DOM
                 if (root) {
-                    elements.forEach((e) => {
+                    lemon.elements.forEach((e) => {
                         root.appendChild(e);
                     });
                 }
