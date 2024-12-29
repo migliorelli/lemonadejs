@@ -197,6 +197,25 @@
 
     const HTMLParser = function(html, values) {
         /**
+         * process the scape chars
+         * @param char
+         * @returns {*|string}
+         */
+        function escape(char) {
+            const escapeMap = {
+                'n': String.fromCharCode(0x0A),
+                'r': String.fromCharCode(0x0D),
+                't': String.fromCharCode(0x09),
+                'b': String.fromCharCode(0x08),
+                'f': String.fromCharCode(0x0C),
+                'v': String.fromCharCode(0x0B),
+                '0': String.fromCharCode(0x00)
+            };
+
+            return escapeMap[char] || char;
+        }
+
+        /**
          * Check if is a self-closing tag
          * @param {string|function} type - Tag name or component function
          * @returns {boolean}
@@ -549,7 +568,20 @@
         // Main loop to process the HTML string
         for (let i = 0; i < html.length; i++) {
             // Current char
-            const char = html[i];
+            let char = html[i];
+            let escaped = false;
+
+            if (values !== null) {
+                // Handle scape
+                if (char === '\\') {
+                    // This is a escaped char
+                    escaped = true;
+                    // Parse escape char
+                    char = escape(html[i+1]);
+                    // Move to the next char
+                    i++;
+                }
+            }
 
             // Global control logic
             if (control.tag) {
@@ -565,8 +597,8 @@
                 }
             }
 
-            // Control references
-            if (char === '$' && html[i+1] === '{') {
+            // Register references for a dynamic template
+            if (! escaped && char === '$' && html[i+1] === '{') {
                 // Get the content of the reference
                 let text = '';
                 // Skip $ and {
@@ -1455,7 +1487,7 @@
         }
 
         // Values
-        let values = [];
+        let values = null;
         // Process return
         if (typeof(view) === 'function') {
             values = view(parseTemplate);
