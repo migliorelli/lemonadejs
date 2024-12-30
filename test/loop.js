@@ -177,6 +177,28 @@ describe('Loop', () => {
     });
 
 
+    it('Loop with bind', function() {
+        function Component() {
 
+            this.language = 'pt_BR';
+
+            this.data = [
+                { title: 'English', value: 'en_GB' },
+                { title: 'Portuguese', value: 'pt_BR' },
+            ]
+
+
+            return render => render `
+                <select :loop="this.data" :bind="this.language">
+                    <option value="{{self.value}}">{{self.title}}</option>
+                </select>`
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('pt_BR', function () {
+            let self = this;
+            return self.el.value;
+        })
+    });
 
 });

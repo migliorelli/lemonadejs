@@ -644,7 +644,7 @@
             lemon.events[token].push(event);
             // Execute
             if (exec) {
-                event();
+                lemon.queue.push(event);
             }
         }
 
@@ -657,9 +657,9 @@
                     appendEvent(tokens[i], event);
                 }
             }
-            // Execute method
-            if (exec === true) {
-                event();
+            // Execute
+            if (exec) {
+                lemon.queue.push(event);
             }
         }
 
@@ -810,7 +810,15 @@
         }
 
         const getRoot = function(item) {
-            return typeof(item.type) === 'function' ? item.parent.element : item.element;
+            if (typeof(item.type) === 'function') {
+                if (item.parent.type === 'template') {
+                    return lemon.root;
+                } else {
+                    return item.parent.element;
+                }
+            }
+
+            return item.element;
         }
 
         const registerLoop = function(item, prop) {
@@ -850,14 +858,7 @@
             }
 
             // Append event
-            let root = getRoot(item);
-            if (root) {
-                appendEvent(prop, event, true);
-            } else {
-                appendEvent(prop, event);
-                // Defer event since the dom is not ready
-                lemon.ready.push(event)
-            }
+            appendEvent(prop, event, true);
         }
 
         const isLoopAttribute = function(props) {
@@ -912,6 +913,26 @@
             return validEventPattern.test(eventName);
         }
 
+        /**
+         * Create element from the string tagname
+         * @param tagName
+         * @returns {*}
+         */
+        const createElementFromString = function(tagName) {
+            // List of SVG tags (you can expand this list if needed)
+            const svgTags = [
+                "svg", "path", "circle", "rect", "line", "polygon", "polyline", "text"
+            ];
+
+            if (svgTags.includes(tagName)) {
+                // For SVG elements, use createElementNS with the correct namespace
+                return document.createElementNS("http://www.w3.org/2000/svg", tagName);
+            } else {
+                // For regular HTML elements, use createElement
+                return document.createElement(tagName);
+            }
+        }
+
         const createElements = function(item) {
             if (typeof(item) === 'object') {
                 // Create element
@@ -956,7 +977,7 @@
                     }
 
                     if (typeof(item.type) === 'string') {
-                        item.element = document.createElement(item.type);
+                        item.element = createElementFromString(item.type);
                     } else if (typeof(item.type) === 'function') {
                         item.self = {};
                     }
@@ -1315,7 +1336,7 @@
                     e.setAttribute('value', value);
                 }
             }
-        } else if (attribute === 'src') {
+        } else if (attribute === 'src' || (e.namespaceURI && e.namespaceURI.includes('svg'))) {
             if (value) {
                 e.setAttribute(attribute, value);
             }
@@ -1456,6 +1477,8 @@
             events: [],
             components: {},
             elements: [],
+            queue: [],
+            root: root,
         }
 
         if (! item) {
@@ -1499,7 +1522,11 @@
             result = view.toString().split('`');
             // Get the original template
             if (result) {
-                result = result[1].trim();
+                // Remove the last element
+                result.shift();
+                result.pop();
+                // Join everything else
+                result = result.join('`').trim();
             }
         } else {
             result = view;
@@ -1519,6 +1546,7 @@
 
             // Create real DOM and append to the root
             element = generateHTML(lemon);
+
             if (element) {
                 // Parents
                 lemon.elements = [];
@@ -1572,6 +1600,17 @@
                         root.appendChild(e);
                     });
                 }
+            } else {
+                // Refresh
+                register(lemon.self, 'refresh', (prop) => {
+                    if (prop) {
+                        if (prop === true) {
+                            runViewValues(lemon);
+                        } else {
+                            lemon.self[prop] = lemon.self[prop];
+                        }
+                    }
+                });
             }
         }
 
@@ -1593,6 +1632,13 @@
                     trackProperty(lemon, props[i]);
                 }
             }
+        }
+
+        // Initial events
+        if (lemon.queue.length) {
+            lemon.queue.forEach(function(v) {
+                v();
+            })
         }
 
         // Process the onload
@@ -1775,17 +1821,10 @@
         const componentName = prefix + '-' + name;
 
         // Check if the component is already defined
-        if (! customElements.get(componentName)) {
+        if (! window.customElements.get(componentName)) {
             class Component extends HTMLElement {
                 constructor() {
                     super();
-                }
-
-                initSettings(props) {
-                    // Copy all values to the object
-                    if (typeof(props) === 'object') {
-                        L.setProperties.call(this, props, true);
-                    }
                 }
 
                 connectedCallback() {
