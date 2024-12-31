@@ -644,7 +644,7 @@
             lemon.events[token].push(event);
             // Execute
             if (exec) {
-                lemon.queue.push(event);
+                event();
             }
         }
 
@@ -657,9 +657,9 @@
                     appendEvent(tokens[i], event);
                 }
             }
-            // Execute
+            // Execute method
             if (exec) {
-                lemon.queue.push(event);
+                event();
             }
         }
 
@@ -858,7 +858,14 @@
             }
 
             // Append event
+            let root = getRoot(item);
+            if (root) {
             appendEvent(prop, event, true);
+            } else {
+                appendEvent(prop, event);
+                // Defer event since the dom is not ready
+                lemon.ready.push(event)
+            }
         }
 
         const isLoopAttribute = function(props) {
@@ -1045,7 +1052,7 @@
                                 // Special properties bound to the self
                                 if (attrName === 'ready') {
                                     whenIsReady(item, prop);
-                                  } else {
+                                } else {
                                     // Get the attribute name
                                     property = extractTokens(property);
                                     // Reference name is found
@@ -1310,7 +1317,7 @@
 
         if (attribute === 'value' && ! propertyValue) {
             // Update HTML form element
-            if (typeof(e.val) === 'function') {
+            if (typeof (e.val) === 'function') {
                 if (e.val() != value) {
                     e.val(value);
                 }
@@ -1319,7 +1326,7 @@
                     e.children[j].selected = value.indexOf(e.children[j].value) >= 0;
                 }
             } else if (e.type === 'checkbox') {
-                e.checked = ! (! value || value === '0' || value === 'false');
+                e.checked = !(!value || value === '0' || value === 'false');
             } else if (e.type === 'radio') {
                 e.checked = false;
                 if (e.value == value) {
@@ -1478,7 +1485,6 @@
             events: [],
             components: {},
             elements: [],
-            queue: [],
             root: root,
         }
 
@@ -1633,13 +1639,6 @@
                     trackProperty(lemon, props[i]);
                 }
             }
-        }
-
-        // Initial events
-        if (lemon.queue.length) {
-            lemon.queue.forEach(function(v) {
-                v();
-            })
         }
 
         // Process the onload
@@ -1923,7 +1922,8 @@
         }
     }
 
-    const state = function() {}
+    const state = function(raw) {
+    }
 
     state.prototype.toString = function() {
         return this.value.toString();
@@ -1965,7 +1965,11 @@
             get: () => value
         });
 
-        return [s, setValue];
+        Object.defineProperty(s, 'raw', {
+            get: () => value
+        });
+
+        return s;
     }
 
     L.helpers = {
