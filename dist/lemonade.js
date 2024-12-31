@@ -737,7 +737,7 @@
                         value = dynamicContent(value);
                     }
 
-                    setAttribute(getElement(item), prop.name, value);
+                    setAttribute(getElement(item), prop.name, value, true);
                 }
             }
         }
@@ -1298,8 +1298,9 @@
      * @param {object} e Element
      * @param {string} attribute
      * @param {any} value
+     * @param {boolean} propertyValue
      */
-    const setAttribute = function(e, attribute, value) {
+    const setAttribute = function(e, attribute, value, propertyValue) {
         // Handle state
         if (value instanceof state) {
             value = value.value;
@@ -1307,13 +1308,13 @@
             value = '';
         }
 
-        if (attribute === 'value') {
+        if (attribute === 'value' && ! propertyValue) {
             // Update HTML form element
             if (typeof(e.val) === 'function') {
                 if (e.val() != value) {
                     e.val(value);
                 }
-            } else if (e.tagName === 'SELECT' && e.getAttribute('multiple')) {
+            } else if (e.tagName === 'SELECT' && e.getAttribute('multiple') !== null) {
                 for (let j = 0; j < e.children.length; j++) {
                     e.children[j].selected = value.indexOf(e.children[j].value) >= 0;
                 }
@@ -1336,18 +1337,18 @@
                     e.setAttribute('value', value);
                 }
             }
-        } else if (attribute === 'src' || (e.namespaceURI && e.namespaceURI.includes('svg'))) {
-            if (value) {
-                e.setAttribute(attribute, value);
-            }
-        } else if (typeof(e[attribute]) !== 'undefined' || typeof(value) === 'object' || typeof(value) === 'function') {
+        } else if (typeof(value) === 'object' || typeof(value) === 'function') {
             e[attribute] = value;
         } else {
             if (isDOM(e)) {
-                if (value === '') {
-                    e.removeAttribute(attribute);
+                if (typeof(e[attribute]) !== 'undefined' && ! (e.namespaceURI && e.namespaceURI.includes('svg'))) {
+                    e[attribute] = value;
                 } else {
-                    e.setAttribute(attribute, value);
+                    if (value === '') {
+                        e.removeAttribute(attribute);
+                    } else {
+                        e.setAttribute(attribute, value);
+                    }
                 }
             } else {
                 e[attribute] = value;
