@@ -986,14 +986,25 @@
                     if (typeof(item.type) === 'string') {
                         item.element = createElementFromString(item.type);
                     } else if (typeof(item.type) === 'function') {
-                        item.self = {};
+                        // Create instance without calling constructor
+                        if (isClass(item.type)) {
+                            item.self = new item.type;
+                        } else {
+                            item.self = {};
+                        }
                     }
 
                     // Create all children
-                    if (item.children && ! item.loop) {
-                        item.children.forEach(child => {
-                            createElements(child);
-                        });
+                    if (! item.loop) {
+                        if (item.children) {
+                            item.children.forEach(child => {
+                                createElements(child);
+                            });
+
+                            if (item.element) {
+                                appendChildren(item.element, item.children);
+                            }
+                        }
                     }
 
                     // Process attributes
@@ -1084,15 +1095,15 @@
                         if (typeof(item.type) === 'function') {
                             // Execute component
                             item.element = L.render(item.type, null, item.self, item);
-                        }
 
-                        // Create all children
-                        if (item.children) {
-                            let root = item.element;
-                            if (item.self && item.self.settings && typeof(item.self.settings.getRoot) === 'function') {
-                                root = item.self.settings.getRoot();
+                            // Create all children
+                            if (item.children) {
+                                let root = item.element;
+                                if (item.self && item.self.settings && typeof(item.self.settings.getRoot) === 'function') {
+                                    root = item.self.settings.getRoot();
+                                }
+                                appendChildren(root, item.children);
                             }
-                            appendChildren(root, item.children);
                         }
                     }
                 }
@@ -1305,7 +1316,7 @@
      * @param {object} e Element
      * @param {string} attribute
      * @param {any} value
-     * @param {boolean} propertyValue
+     * @param {boolean?} propertyValue
      */
     const setAttribute = function(e, attribute, value, propertyValue) {
         // Handle state
@@ -1474,6 +1485,13 @@
             self = {};
         }
 
+        // Web component
+        if (self.tagName && self.tagName.includes('-')) {
+            let props = getAttributes.call(self, true);
+            // Copy all values to the object
+            L.setProperties.call(self, props, true);
+        }
+
         // Arguments
         let args = Array.from(arguments);
 
@@ -1506,7 +1524,9 @@
             currentLemon = lemon;
 
             if (isClass(component)) {
-                self = new component(self);
+                if (! self instanceof component) {
+                    lemon.self = self = new component(self);
+                }
                 view = self.render(item.children);
             } else {
                 // Execute component
@@ -1795,13 +1815,7 @@
         }
     }
 
-    L.component = class {
-        constructor(s) {
-            if (s) {
-                Object.assign(this, s);
-            }
-        }
-    }
+    L.component = class {}
 
     /**
      * Create a Web Component
@@ -1834,10 +1848,6 @@
                     let state = typeof(this.el) === 'undefined';
                     // LemonadeJS is already rendered
                     if (state === true) {
-                        // Get attributes
-                        let props = getAttributes.call(self, true);
-                        // Copy all values to the object
-                        L.setProperties.call(self, props, true);
                         // Render
                         if (options && options.applyOnly === true) {
                             // Merge component
@@ -1922,8 +1932,7 @@
         }
     }
 
-    const state = function(raw) {
-    }
+    const state = function() {}
 
     state.prototype.toString = function() {
         return this.value.toString();
@@ -1962,10 +1971,6 @@
         // Make the value attribute dynamic
         Object.defineProperty(s, 'value', {
             set: setValue,
-            get: () => value
-        });
-
-        Object.defineProperty(s, 'raw', {
             get: () => value
         });
 

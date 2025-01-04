@@ -141,4 +141,26 @@ describe('Bind', () => {
         })
     });
 
+
+    it('Normal bind on select', function() {
+        function Component() {
+            // Default value of the property which is bound to the value of the dropdown
+            this.language = 'pt_BR';
+
+            return render => render`<select :bind="self.language">
+                <option value="">Choose one</option>
+                <option value="en_GB">English</option>
+                <option value="pt_BR">Portuguese</option>
+            </select>`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert(2, function () {
+            let self = this;
+            // Check for the title updates
+            return self.el.selectedIndex;
+        })
+    });
+
+
 });
