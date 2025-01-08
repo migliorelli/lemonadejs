@@ -177,4 +177,19 @@ describe('Properties', () => {
             return self.el.value;
         })
     });
+
+    it('Composition Input', function() {
+        function Component() {
+            this.total = 20;
+            // This is not inline scripting and can be used with CSP.
+            return render => render`<input type="text" value="total ${this.total*2}" />`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('total 40', function () {
+            let self = this;
+            // Return the value
+            return self.el.value;
+        })
+    });
 });

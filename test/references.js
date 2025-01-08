@@ -68,6 +68,30 @@ describe('References', () => {
     });
 
 
+    it('Reference as a method', function() {
+        function Test() {
+            let ref = null;
+
+            this.onload = () => {
+                ref.style.color = 'red';
+            }
+
+            return render => render`<div :ref="${(e) => ref = e})">Hello World</div>`;
+        }
+
+        lemonade.setComponents({ Test })
+
+        // Get the attributes from the tag
+        function Component() {
+            return render => render`<div><input type="text" :ref="self.test" /><Test :input="self.test" /></div>`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('[object HTMLInputElement]', function () {
+            let self = this;
+            return self.el.textContent;
+        })
+    });
 
 
 
