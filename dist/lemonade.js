@@ -1099,7 +1099,7 @@
                             // Create all children
                             if (item.children) {
                                 let root = item.element;
-                                if (item.self && item.self.settings && typeof(item.self.settings.getRoot) === 'function') {
+                                if (item.self && item.self.settings && typeof (item.self.settings.getRoot) === 'function') {
                                     root = item.self.settings.getRoot();
                                 }
                                 appendChildren(root, item.children);
