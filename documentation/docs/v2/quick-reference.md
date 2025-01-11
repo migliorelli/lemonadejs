@@ -26,7 +26,7 @@ A LemonadeJS Pico component implements common application requirements and shoul
 *   [Signature](/docs/plugins/signature): (1.5 KBytes): a optimized implementation of a javascript signature pad.
 
   
-Send you suggestion on our [github page](https://github.com/lemonadejs/lemonadejs) or by email contact@lemonadejs.net  
+Send you suggestion on our [github page](https://github.com/lemonadejs/lemonadejs) or by email contact@lemonadejs.com  
   
   
 

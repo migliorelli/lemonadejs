@@ -30,7 +30,7 @@ All attributes defined within the custom component tag in the template are acces
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Hello() {
@@ -97,7 +97,7 @@ Any HTML content within a custom component tag is recognized as its template. Th
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 // Template is based on the caller innerHTML
@@ -164,7 +164,7 @@ To declare a local component, you can use `lemonade.element` to create your comp
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 // Component
@@ -214,7 +214,7 @@ The `refresh` method within `self` is designed to initiate the update of an enti
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 // Component

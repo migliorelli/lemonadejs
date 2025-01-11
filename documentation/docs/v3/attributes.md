@@ -31,7 +31,7 @@ The `:ref` creates a property in the `self` as a reference to the DOM element de
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Reference() {
@@ -76,7 +76,7 @@ The `:bind` implements a synchronization `self` property to a component or HTML 
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Two() {
@@ -128,7 +128,7 @@ The `:ready` will call the defined method when the element is ready and appended
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Ready() {
@@ -174,7 +174,7 @@ The `:loop` creates a list of elements based on a template from an array of obje
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Loop() {

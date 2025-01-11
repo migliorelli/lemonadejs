@@ -20,7 +20,7 @@ Source code
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Lamp = (function() {

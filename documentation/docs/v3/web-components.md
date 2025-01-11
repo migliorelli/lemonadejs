@@ -1,18 +1,12 @@
-title: Integrating Web Components with LemonadeJS,
+title: Web Components with LemonadeJS v3
 keywords: LemonadeJS, web components, frontend, javascript library, integration,
-description: Learn how to create LemonadeJS components that seamlessly integrate with web components, enhancing your web applications with custom elements.
+description: Learn how to create web components with LemonadeJS version 3.
 
-Web components
-==============
+# Web Components
+ 
+## Overview
 
-  
-
-Reactive web-components
------------------------
-
-  
-
-### How to create reactive web components with LemonadeJS
+### Reactive web components with LemonadeJS v3
 
 There are two necessary methods to create reactive web-components using LemonadeJS. The method `render()` should return the template, the `connectedCallback()` will execute and append the result to the DOM when the web-component is ready.  
   

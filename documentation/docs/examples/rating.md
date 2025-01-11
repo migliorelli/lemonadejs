@@ -18,7 +18,7 @@ A basic star rating implementation
 ```html
 <html>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Rating() {

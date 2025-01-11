@@ -15,7 +15,7 @@ A very common usage is when the developer needs the values of element forms back
 <input type='text' name='email' value='roger@rabbit.com' onchange='self.email = this.value'>
 
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 

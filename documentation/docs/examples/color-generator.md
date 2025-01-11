@@ -1,6 +1,7 @@
 title: Color Generator,
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, examples,
 description: A simple reactive color generator using the mouse move event.
+canonical: https://lemonadejs.com/docs/examples/color-generator
 
 Color Changer
 =============
@@ -22,7 +23,7 @@ Pass the mouse over the cards to change their colors
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function ColorChanger() {

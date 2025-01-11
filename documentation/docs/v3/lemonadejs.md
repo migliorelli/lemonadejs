@@ -5,7 +5,7 @@ jExcel is a super lightweight vanilla javascript library (3Kb) to help deliver r
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonadejs.js"></script>
+<script src="https://lemonadejs.com/v1/lemonadejs.js"></script>
 
 <div id="root"></div>
 

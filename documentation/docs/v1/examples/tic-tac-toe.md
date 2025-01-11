@@ -1,21 +1,12 @@
-title: JavaScript Tic Tac Toe Game
+title: JavaScript Tic Tac Toe Game With LemonadeJS v1
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, examples
-description: The reactive javascript tic-tac-toe game implementation using LemonadeJS.
+description: The reactive javascript tic-tac-toe game implementation using LemonadeJS version 1.
 
+# Tic Tac Toe with LemonadeJS v1
 
-Tic Tac Toe
-===========
+The Tic tac toe is a classical game where two players take turns marking the spaces in a three-by-three grid with X or O. The player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row is the winner. In this tutorial we will explain how to create a basic version of the game using LimonadeJS version 5.  
 
-The Tic tac toe is a classical game where two players take turns marking the spaces in a three-by-three grid with X or O. The player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row is the winner. In this tutorial we will explan how to create a basic version of the game using LimonadeJS.  
-  
-
-A working example
------------------
-
-  
-
-Source code
------------
+## A working example
 
 ```javascript
 var Tictactoe = function() {

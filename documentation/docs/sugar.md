@@ -26,7 +26,7 @@ In the following example, the self is registered on the Profile component and re
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Profile() {
@@ -76,7 +76,7 @@ To illustrate this concept, we'll use an example similar to the one above, utili
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Profile() {

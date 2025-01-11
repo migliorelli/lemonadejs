@@ -21,7 +21,7 @@ Installation
 You can add the following to your project, download and use locally or even use NPM.
 
 ```xml
-<script src="https://lemonadejs.net/v1/lemonade.js" crossorigin="anonymous"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js" crossorigin="anonymous"></script>
 ```
 
 ### NPM installation
@@ -53,7 +53,7 @@ The following example is the mininum usage of lemonadejs in your website or web 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -72,7 +72,7 @@ When a self property is used in the View, and a change to this property happens,
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 

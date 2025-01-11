@@ -23,7 +23,7 @@ Source code
 <link rel="stylesheet" href="https://jsuites.net/jsuites.css" type="text/css" />
 <link rel="stylesheet" href="https://jsuites.net/jsuites.layout.css" type="text/css" />
 <script type="text/javascript" src="https://jsuites.net/jsuites.js"></script>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Countdown = (function(container) {

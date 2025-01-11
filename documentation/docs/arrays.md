@@ -32,7 +32,7 @@ When using the `:loop` on a native HTML tag, the innerHTML of the tag will be co
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Crypto() {
@@ -80,7 +80,7 @@ Custom components allow controls and behavior to be bound to each element in the
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 /**
@@ -154,7 +154,7 @@ The next example, brings the template inside the custom controller, and includes
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Component() {
@@ -243,7 +243,7 @@ As described above, LemonadeJS will create a DOM Element and save the reference 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Multiple() {

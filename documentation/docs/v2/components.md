@@ -30,7 +30,7 @@ All attributes used in the custom component tag in the template will be availabl
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Hello() {
@@ -84,7 +84,7 @@ Any HTML inside component tag is considered as a template, and it will passed to
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 // Template is based on the caller innerHTML
@@ -123,7 +123,7 @@ It is important to notice in the examples above that the components `Hello` and 
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 // Component

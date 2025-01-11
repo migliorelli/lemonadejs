@@ -68,13 +68,13 @@ The LemonadeJS official components are javascript implementation of common appli
 ### Testing Library
 
 - Tester is a official library for testing LemonadeJS components.  
-[https://lemonadejs.net/docs/v3/tests](/docs/v3/tests)  
+[https://lemonadejs.com/docs/v3/tests](/docs/v3/tests)  
   
 
 ### Pico Library
 
 - Pico is a unique collection of LemonadeJS components with no dependencies and a limit of 2 KBytes each.  
-[https://lemonadejs.net/docs/plugins](/docs/plugins)  
+[https://lemonadejs.com/docs/plugins](/docs/plugins)  
   
   
 
@@ -91,7 +91,7 @@ As shown in the example below, all property value updates will affect the elemen
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Hello() {

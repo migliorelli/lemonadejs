@@ -19,7 +19,7 @@ Reactive color picker LemonadeJS.
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Color() {

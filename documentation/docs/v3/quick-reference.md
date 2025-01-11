@@ -85,7 +85,7 @@ Testing
 
 Create unit tests for your LemonadeJS components.  
   
-[https://lemonadejs.net/docs/tests](/docs/v3/tests)  
+[https://lemonadejs.com/docs/tests](/docs/v3/tests)  
   
   
   

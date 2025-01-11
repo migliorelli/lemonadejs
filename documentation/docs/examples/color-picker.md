@@ -1,6 +1,7 @@
 title: JavaScript color picker example,
 keywords: LemonadeJS, two-way binding, frontend, javascript library, javascript plugin, javascript, reactive, react, color picker,
-description: A simple implementation of a reactive JavaScript color picker using LemonadeJS. 
+description: A simple implementation of a reactive JavaScript color picker using LemonadeJS.
+canonical: https://lemonadejs.com/docs/examples/color-picker
 
 Color picker
 ============
@@ -19,7 +20,7 @@ Reactive color picker LemonadeJS.
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Color() {

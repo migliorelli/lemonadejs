@@ -1,4 +1,4 @@
-title: Getting Started with LemonadeJS v4: Reactive Programming for Frontend Developers
+title: Getting Started with LemonadeJS v4
 keywords: LemonadeJS, JavaScript library, reactive programming, two-way data binding, frontend architecture, micro-library efficiency, version 4 documentation
 description: Initiate development with LemonadeJS v4, the advanced reactive micro-library tailored for efficient front-end development. Learn the mechanics of two-way data binding and state management to construct performant web interfaces. Delve into version 4's technical advancements and streamlined API in our detailed documentation.
 
@@ -95,7 +95,7 @@ In LemonadeJS, data binding is both intuitive and efficient. When you declare a 
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Hello() {

@@ -29,7 +29,7 @@ The :bind creates a transparent event to keep the self property in sync with the
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Input() {
@@ -62,7 +62,7 @@ The checkbox works similarly to the example above. The state of the checkbox and
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Checkbox() {
@@ -97,7 +97,7 @@ On a radio HTML element, the self attribute should be the same so that `self` pr
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Radio() {
@@ -145,7 +145,7 @@ The multiple select has a different handler from other HTML elements. That is be
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Multiple() {
@@ -179,7 +179,7 @@ LemonadeJS will track changes and keep the `self` property value in sync with ch
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Editable() {
@@ -213,7 +213,7 @@ The following example shows an implementation of `:bind` in custom elements.
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Test() {
@@ -251,7 +251,7 @@ The following example shows a jSuites [JavaScript Tags](https://jsuites.net/docs
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <script src="https://jsuites.net/v4/jsuites.js"></script>
 <link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" />
 <div id='root'></div>

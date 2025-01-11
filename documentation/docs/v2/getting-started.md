@@ -63,7 +63,7 @@ When a property is used in the template, all updates in the property value will 
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='counter'></div>
 <script>
 var Hello = function() {

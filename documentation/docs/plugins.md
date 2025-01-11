@@ -1,7 +1,7 @@
 title: JavaScript Components and Plugins
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, lists, loops, arrays, plugins
 description: Find out several useful JavaScript reactive components common to any web application.
-canonical: https://lemonadejs.net/docs/plugins
+canonical: https://lemonadejs.com/docs/plugins
 
 ![JavaScript Plugins](img/library.jpg){.right}
 
@@ -47,7 +47,8 @@ The LemonadeJS component library includes other JavaScript plugins and component
 * [Context Menu](/docs/plugins/context-menu) : JavaScript responsive context menu.
 * [Tabs](/docs/plugins/tabs) : Simple javascript tabs component.
 * [Image cropper](/docs/plugins/image-cropper) : A linkedin-style photo cropper.
-
+* [JavaScript Switch](/docs/plugins/switch): A lightweight reactive switch button.
+* [JavaScript Top Menu](/docs/plugins/top-menu): A lightweight reactive top menu.
 
 
 {.green}

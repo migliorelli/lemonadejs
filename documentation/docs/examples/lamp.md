@@ -18,7 +18,7 @@ A working example
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Lamp() {
@@ -33,7 +33,7 @@ function Lamp() {
     }
     
     return `<>
-        <img src="https://lemonadejs.net/templates/default/img/example-lamp-{{self.state?'on':'off'}}.jpg">
+        <img src="https://lemonadejs.com/templates/default/img/example-lamp-{{self.state?'on':'off'}}.jpg">
         <br/>
         <input type="button" onclick="self.on" value="Light on" />
         <input type="button" onclick="self.off" value="Light off" />
@@ -58,7 +58,7 @@ export default function Lamp() {
     }
     
     return `<div>
-        <img src="https://lemonadejs.net/templates/default/img/example-lamp-{{self.state?'on':'off'}}.jpg">
+        <img src="https://lemonadejs.com/templates/default/img/example-lamp-{{self.state?'on':'off'}}.jpg">
         <br/>
         <input type="button" onclick="self.on" value="Light on" />
         <input type="button" onclick="self.off" value="Light off" />

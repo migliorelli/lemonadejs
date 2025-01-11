@@ -1,6 +1,7 @@
 title: JavaScript Reactive Counter Example
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, javascript plugin, javascript, reactive, react, examples,
 description: A basic counter reactive example using LemonadeJS.
+canonical: https://lemonadejs.com/docs/examples/counter
 
 Reactive Counter Example
 =======
@@ -9,7 +10,7 @@ How to write a simple reactive counter using LemonadeJS. [See this example on co
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Counter() {

@@ -30,7 +30,7 @@ The `@ref` creates a property in the `self` as a reference to the element define
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Reference = (function() {
@@ -65,7 +65,7 @@ The `@bind` helps to link a `self` property to the HTML element value. Thus help
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Tracking = (function() {
@@ -104,7 +104,7 @@ The `@ready` will call the defined method when the element is ready and appended
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Ready = (function() {
@@ -140,7 +140,7 @@ The `@loop` creates a list of elements based on a template from an array of obje
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Mylist = (function() {

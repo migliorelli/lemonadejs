@@ -20,7 +20,7 @@ Tracking changes in a DIV dimensions example
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Width = (function() {

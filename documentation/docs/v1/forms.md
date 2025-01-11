@@ -17,7 +17,7 @@ The most simple application would be with the input and textarea where the oncha
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -48,7 +48,7 @@ The checkbox is working very similarly to the example above. It should keep the 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -89,7 +89,7 @@ On radios the self attribute should be the same to can keep the value from the s
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -127,7 +127,7 @@ The multiple select has a different handler from other HTML elements. That is be
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 

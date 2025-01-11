@@ -28,4 +28,4 @@ Currently the following components is available on the official LemonadeJS Pico 
 
 ### Submit your components
 
-If you have created something awesome and would like to share, send your suggestion to: contact@lemonadejs.net
+If you have created something awesome and would like to share, send your suggestion to: contact@lemonadejs.com

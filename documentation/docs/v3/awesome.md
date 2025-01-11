@@ -18,7 +18,7 @@ Here is a interesting working examples worth sharing.
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Component() {
@@ -107,7 +107,7 @@ window.customElements.define('first-element', FirstElement);
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Component() {
@@ -161,7 +161,7 @@ export default function Component() {
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v3/lemonade.js"></script>
+<script src="https://lemonadejs.com/v3/lemonade.js"></script>
 <div id='root'></div>
 <script>
 function Component() {

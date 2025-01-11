@@ -18,7 +18,7 @@ The `@ref` will create a property in the self and reference it to a existing rea
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <script src="https://jsuites.net/jsuites.js"></script>
 <link rel="stylesheet" href="https://jsuites.net/jsuites.css" type="text/css" />
@@ -57,7 +57,7 @@ The `@bind` will bind the value of the HTML element into the self and create a c
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Binding = (function() {
@@ -91,7 +91,7 @@ The `@ready` will call the defined method as soon as the element is ready and ap
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <script src="https://jsuites.net/jsuites.js"></script>
 <link rel="stylesheet" href="https://jsuites.net/jsuites.css" type="text/css" />
 <div id='root'></div>

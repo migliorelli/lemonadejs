@@ -33,7 +33,7 @@ When using the `@loop` on a native HTML tag, the innerHTML of the tag will be co
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 const Crypto = function() {
@@ -65,7 +65,7 @@ Custom components allows controls and behavior to be bound to each element in th
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 /**
@@ -111,7 +111,7 @@ The next example, brings the template inside the custom controller, and includes
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 const Component = function() {
@@ -165,7 +165,7 @@ As described above, LemonadeJS will create a DOM Element and save the reference 
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 const Multiple = function() {

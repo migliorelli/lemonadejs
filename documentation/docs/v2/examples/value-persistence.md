@@ -17,7 +17,7 @@ The value is updated on the localStorage on the dropdown changes its value.
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Persistence = (function() {

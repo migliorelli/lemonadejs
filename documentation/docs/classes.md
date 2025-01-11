@@ -15,7 +15,7 @@ The following code snippet shows a LemonadeJS component as a class:
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 <div id='root'></div>
 <script>
 class Counter extends lemonade.component {

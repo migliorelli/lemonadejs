@@ -13,7 +13,7 @@ The natural answer for this question is creating a JS event to update the self p
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var self = { name: 'paul@beatles.com' };
@@ -31,7 +31,7 @@ There are three magic HTML property available: `@bind, @ready, @ref`. We are goi
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var self = { name: 'paul@beatles.com' };
@@ -49,7 +49,7 @@ The following example shows the `@bind` usage in different form elements
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -92,7 +92,7 @@ There is no natural observer in JavaScript for arrays. For that reason, to refle
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 
@@ -151,7 +151,7 @@ Jsuites is a lightweight collection of common plugins that is already integrated
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <script src="https://jsuites.net/jsuites.js"></script>
 <link rel="stylesheet" href="https://jsuites.net/jsuites.css" type="text/css" />
 

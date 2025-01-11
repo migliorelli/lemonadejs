@@ -13,7 +13,7 @@ Create a basic counter as a JavaScript class.
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 class Counter extends lemonade.component {

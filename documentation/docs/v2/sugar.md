@@ -26,7 +26,7 @@ On the following example, the self is registered on the Profile component, and r
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='profile'></div>
 <div id='loader'></div>
 <script>
@@ -94,7 +94,7 @@ To make easy we will a similar example as above, using the flag persistence to k
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='profile'></div>
 <div id='loader'></div>
 <script>

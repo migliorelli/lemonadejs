@@ -21,7 +21,7 @@ Source code
 ```html
 <html>
 <link rel="stylesheet" href="https://jsuites.net/jsuites.layout.css" type="text/css" />
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Color = (function(container) {

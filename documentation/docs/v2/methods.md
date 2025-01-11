@@ -29,7 +29,7 @@ The following examples are basic examples on how to apply a self to an existing 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 
 <div id='root'>
     <h1>{{self.title}}</h1>
@@ -56,7 +56,7 @@ The following example binds a self to an HTML form to control the values of the 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 
 <form id='myForm'>
     <div class='form-group'>

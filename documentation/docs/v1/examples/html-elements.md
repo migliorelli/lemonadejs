@@ -12,7 +12,7 @@ Lemonadejs brings two-way binding natively. Each change in the property of a `se
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v1/lemonade.js"></script>
+<script src="https://lemonadejs.com/v1/lemonade.js"></script>
 
 <div id='root'></div>
 

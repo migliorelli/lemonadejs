@@ -105,7 +105,7 @@ export default function Component() {
     return `<>
         <List :data="self.rows" :search="true" :pagination="5">
             <div class="card">
-                <img src="https://lemonadejs.net/templates/default/img/pokemon/{{self.id}}.svg" />
+                <img src="https://lemonadejs.com/templates/default/img/pokemon/{{self.id}}.svg" />
                 <div>{{self.name}}</div>
             </div>
         </List>

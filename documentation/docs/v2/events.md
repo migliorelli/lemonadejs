@@ -22,7 +22,7 @@ There is a call to the method `self.onchange` when the value of a self property 
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Component = (function() {
@@ -60,7 +60,7 @@ The component method `self.onload` will be called when the component is ready an
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Component = (function() {
@@ -92,7 +92,7 @@ From version 2.2.4 you can pass the event object (e) from the template to any ev
   
 ```html
 <html>
-<script src="https://lemonadejs.net/v2/lemonade.js"></script>
+<script src="https://lemonadejs.com/v2/lemonade.js"></script>
 <div id='root'></div>
 <script>
 var Component = (function() {

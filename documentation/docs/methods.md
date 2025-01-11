@@ -43,7 +43,7 @@ This example demonstrates how to integrate LemonadeJS into an existing HTML stru
 
 ```html
 <html>
-<script src="https://lemonadejs.net/v4/lemonade.js"></script>
+<script src="https://lemonadejs.com/v4/lemonade.js"></script>
 
 <div id='root'>
     <p><strong>{{self.title}}</strong></p>
