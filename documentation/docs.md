@@ -1,10 +1,12 @@
 title: Documentation LemonadeJS v4
 keywords: LemonadeJS, two-way data binding, frontend, javascript library, Reactive, React, Vue, Angular, micro library
-description: Discover more about LemonadeJS and how can help you build faster applications. 
+description: Discover more about LemonadeJS and how can help you build faster applications.
+canonical: https://lemonadejs.com/docs
 
 LemonadeJS micro library
 ========
 
+{.small}
 LemonadeJS is about 7 KBytes
 
 LemonadeJS is a micro JavaScript library to help developers to build amazing reactive web-based applications. The library is free and distribute under MIT license.
@@ -49,15 +51,15 @@ Libraries
 
 ### Components
 
-* [Data grid](/docs/plugins/data-grid)
-* [Modal](/docs/plugins/modal)
-* [Calendar](/docs/plugins/calendar)
-* [Dropdown](/docs/plugins/dropdown)
-* [Color picker](/docs/plugins/color-picker)
-* [Timeline](/docs/plugins/timeline)
-* [Context Menu](/docs/plugins/context-menu)
-* [Tabs](/docs/plugins/tabs)
-* [Image cropper](/docs/plugins/image-cropper "Photo cropper and filters component")
+* [JavaScript Data Grid](/docs/plugins/data-grid)
+* [JavaScript Calendar](/docs/plugins/calendar)
+* [JavaScript Dropdown](/docs/plugins/dropdown)
+* [JavaScript Modal](/docs/plugins/modal)
+* [JavaScript Color Picker](/docs/plugins/color-picker)
+* [JavaScript Timeline](/docs/plugins/timeline)
+* [JavaScript Context Menu](/docs/plugins/context-menu)
+* [JavaScript Tabs](/docs/plugins/tabs)
+* [JavaScript Image Cropper](/docs/plugins/image-cropper "Photo cropper and filters component")
 
 Examples
 --------
