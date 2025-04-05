@@ -5,14 +5,9 @@
  * Description: Create amazing web based reusable components.
  *
  * This software is distributed under MIT License
+ * @Roadmap
+ * Accept interpolated values on properties `<div test="test: ${state}"></div>
  */
-
-// - state as part of a property assignment render`<div test="test: ${state}`
-// - loop with a local variable array
-// - example with manual loop
-// - revisar exempls state com arrys or objetos (mutable)
-// um jeito de monitorar mudancas de propriedade sem colocar a tag na template.... tipo o widht height left right da Modal
-// dispatch tem que retornar algo?
 
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -58,7 +53,7 @@
     }
 
     /**
-     * Reference token is a string that define a token and not a expression
+     * Reference token is a string that define a token and not an expression
      * @param {string} token
      * @param {boolean?} topLevelOnly
      * @returns {boolean}
@@ -388,7 +383,7 @@
         /**
          * Extract content between expression markers, handling quoted content
          * @param {string} html - Full HTML string
-         * @param {number} startIndex - Starting index (position after ${)
+         * @param {number} startIndex - Starting index (position after ${})
          * @returns {Object} Expression content and ending position
          */
         function extractExpressionContent(html, startIndex) {
@@ -764,7 +759,7 @@
                     let result = extractFromPath.call(s, b);
                     // Evaluation for legacy purposes
                     if (typeof(result) === 'undefined') {
-                        // This is deprecated and will be drop on LemonadeJS 6
+                        // This is deprecated and will be dropped on LemonadeJS 6
                         result = run.call(s, b);
                         if (typeof (result) === 'undefined') {
                             result = '';
@@ -803,6 +798,7 @@
             if (! isHTML(value)) {
                 node.textContent = value;
             } else {
+                // TODO: improve that
                 requestAnimationFrame(() => {
                     // Create temporary container
                     const t = document.createElement('div');
@@ -954,17 +950,20 @@
             // Create a reference to the DOM element
             let property = prop.expression || prop.value;
 
+            // Append the template back to the correct position
+            if (lemon.self.settings?.loop) {
+                lemon.self.settings.loop(item)
+            }
+
             // Event
             let updateLoop = function(data) {
                 // Component
                 let method = typeof(item.type) === 'function' ? item.type : Basic;
-                // Elements
-                let items = [];
-                // Append the template back to the correct position
-                if (lemon.self?.settings?.loop) {
-                    let children = lemon.self.settings.loop[prop];
-                    if (children) {
-                        item.children = children;
+                // Remove all DOM
+                let root = getRoot(item);
+                if (root) {
+                    while (root.firstChild) {
+                        root.firstChild.remove();
                     }
                 }
                 // Process the data
@@ -972,26 +971,15 @@
                     // Process data
                     data.forEach(function(self) {
                         let el = self.el;
-                        if (! el) {
+                        if (el) {
+                            root.appendChild(el);
+                        } else {
                             // Register parent
                             register(self, 'parent', lemon.self);
                             // Render
-                            el = L.render(method, null, self, item);
+                            L.render(method, root, self, item);
                         }
-                        items.push(el);
                     })
-                }
-
-                // Remove all DOM
-                let root = getRoot(item);
-                if (root) {
-                    while (root.firstChild) {
-                        root.firstChild.remove();
-                    }
-                    // Insert elements to the DOM
-                    while (items.length) {
-                        root.appendChild(items.shift());
-                    }
                 }
             }
 
@@ -1013,12 +1001,7 @@
                     let p = extractFromPath.call(lemon.self, property, true);
                     if (p) {
                         // Append event to the token change
-                        let token = p[1]
-                        if (! lemon.events[token]) {
-                            lemon.events[token] = []
-                        }
-                        // Push the event
-                        lemon.events[token].push(event);
+                        appendEvent(p[1], event);
                     }
                 }
             } else {
@@ -1213,7 +1196,7 @@
                         // Reorder props
                         item.props = reorderProps(item.props);
                         // Order by priority
-                        item.props.forEach(function(prop, k) {
+                        item.props.forEach(function(prop) {
                             // If the property is an event
                             let event = getAttributeEvent(prop.name);
                             // When event for a DOM
@@ -1260,8 +1243,6 @@
                                     }
                                 }
                             } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
-                                // Create a reference to the DOM element
-                                let property = prop.expression || prop.value;
                                 // Special lemonade attribute name
                                 let attrName = getAttributeName(prop.name);
                                 // Special properties bound to the self
@@ -1306,53 +1287,6 @@
         createElements(lemon.tree);
 
         return lemon.tree.element;
-    }
-
-    const nodeToXml = function(node) {
-        function buildElement(node) {
-            // Handle text nodes
-            if (node.type === '#text') {
-                // Check for textContent in props
-                const textContentProp = node.props?.find(prop => prop.name === 'textContent');
-                if (textContentProp) {
-                    return escapeXml(textContentProp.value);
-                }
-                return '';
-            }
-
-            // Handle element nodes
-            const attributes = node.props?.length
-                ? ' ' + node.props
-                .map(attr => `${attr.name}="${escapeXml(attr.value)}"`)
-                .join(' ')
-                : '';
-
-            // If no children, create self-closing tag
-            if (!node.children?.length) {
-                return `<${node.type}${attributes}/>`;
-            }
-
-            // Process children
-            const childrenXml = node.children
-                .map(child => buildElement(child))
-                .join('');
-
-            // Return complete element
-            return `<${node.type}${attributes}>${childrenXml}</${node.type}>`;
-        }
-
-        // Escape special XML characters
-        function escapeXml(text) {
-            if (text === undefined || text === null) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&apos;');
-        }
-
-        return buildElement(node);
     }
 
     /**
@@ -1462,8 +1396,8 @@
 
     /**
      * Basic handler
-     * @param {string} t - HTML template
-     * @return {HTMLElement}
+     * @param {string|object} t - HTML template
+     * @return {string|object}
      */
     const Basic = function(t) {
         return t;
@@ -1531,10 +1465,7 @@
             } else if (e.type === 'checkbox') {
                 e.checked = !(!value || value === '0' || value === 'false');
             } else if (e.type === 'radio') {
-                e.checked = false;
-                if (e.value == value) {
-                    e.checked = true;
-                }
+                e.checked = e.value == value;
             } else if (e.getAttribute && e.getAttribute('contenteditable')) {
                 if (e.innerHTML != value) {
                     e.innerHTML = value;
@@ -1781,35 +1712,43 @@
                 // Register element when is not registered inside the component
                 register(lemon.self, 'el', element);
 
+                const destroy = () => {
+                    // Do not add in the same root
+                    let div = document.createElement('div');
+                    // Append temporary DIV to the same position
+                    lemon.elements[0].parentNode.insertBefore(div, lemon.elements[0]);
+                    // Remove the old elements
+                    lemon.elements.forEach((e) => {
+                        e.remove();
+                    });
+                    // Root element
+                    args[1] = div;
+                    // Create a new component
+                    L.render(...args);
+                    // Append elements in the same position in the DOM tree
+                    while (div.firstChild) {
+                        div.parentNode.insertBefore(div.firstChild, div);
+                    }
+                    // Remove DIV
+                    div.remove();
+                    // Object not in use
+                    lemon = null;
+                }
+
                 // Refresh
                 register(lemon.self, 'refresh', (prop) => {
                     if (prop) {
                         if (prop === true) {
-                            // Do not add in the same root
-                            let div = document.createElement('div');
-                            // Append temporary DIV to the same position
-                            lemon.elements[0].parentNode.insertBefore(div, lemon.elements[0]);
-                            // Remove the old elements
-                            lemon.elements.forEach((e) => {
-                                e.remove();
-                            });
-                            // Root element
-                            args[1] = div;
-                            // Create a new component
-                            L.render(...args);
-                            // Append elements in the same position in the DOM tree
-                            while (div.firstChild) {
-                                div.parentNode.insertBefore(div.firstChild, div);
-                            }
-                            // Remove DIV
-                            div.remove();
-                            // Object not in use
-                            lemon = null;
+                            destroy();
                         } else {
                             lemon.self[prop] = lemon.self[prop];
                         }
                     } else {
-                        runViewValues(lemon);
+                        if (lemon.view) {
+                            runViewValues(lemon);
+                        } else {
+                            destroy();
+                        }
                     }
                 });
 
@@ -1917,8 +1856,8 @@
 
     /**
      * Set the values from {o} to {this}
-     * @param {object} o set the values of {this} when the this[property] is found in {o}, or when flag force is true
-     * @param {boolean} f create a new property when that does not exists yet, but is found in {o}
+     * @param {object} o set the values of {this} when the `this[property]` is found in {o}, or when flag force is true
+     * @param {boolean} f create a new property when that does not exist yet, but is found in {o}
      * @return {object} this is redundant since object {this} is a reference and is already available in the caller
      */
     L.setProperties = function(o, f) {
@@ -2101,6 +2040,16 @@
         currentLemon.change.push(event);
     }
 
+    L.track = function(prop) {
+        if (! currentLemon) {
+            createError(wrongLevel);
+        }
+
+        if (! currentLemon.events[prop]) {
+            currentLemon.events[prop] = [];
+        }
+    }
+
     /**
      * Run view values
      * @param lemon
@@ -2171,9 +2120,6 @@
 
     L.helpers = {
         path: extractFromPath,
-        getTemplate: function(node) {
-            return nodeToXml(node)
-        },
         properties: {
             get: L.getProperties,
             set: L.setProperties,

@@ -3,12 +3,66 @@
  * https://lemonadejs.net
  */
 
-declare function lemonade() : any;
+// HTML extensions for LemonadeJS attributes
+/*declare global {
+    interface HTMLElement {
+        ':ref'?: string;
+        ':bind'?: string;
+        ':data'?: string;
+        ':click'?: string;
+        ':keydown'?: string;
+        ':keyup'?: string;
+        ':change'?: string;
+        ':checked'?: string;
+        ':selected'?: string;
+        ':value'?: string;
+        [key: `:${string}`]: string | undefined;
+    }
+}*/
+
+// Core types
+type OnloadFunction<T extends HTMLElement> = (element: T) => void;
+type OnchangeFunction<T extends HTMLElement> = (prop: string, elements: T[]) => void;
+type State<T> = { value: T };
+type StateCallback<T> = (newValue: T, oldValue: T) => void;
+
+// Render types
+type RenderTemplate = (strings: TemplateStringsArray, ...values: any[]) => HTMLElement;
+
+// Component types
+interface ComponentThis {
+    [key: string]: any;
+}
+
+type FunctionComponent = {
+    (this: ComponentThis): (render: RenderTemplate) => HTMLElement;
+    prototype: any;
+}
+
+interface ComponentClass {
+    new (props?: Record<string, any>): {
+        el: HTMLElement;
+        refresh: (target?: string) => void;
+        [key: string]: any;
+    };
+}
+
+export type Component = FunctionComponent | ComponentClass;
+
+// Module level exports
+export const onload: (method: OnloadFunction<HTMLElement>) => void;
+export const onchange: (method: OnchangeFunction<HTMLElement>) => void;
+export const state: <T>(value: T, callback?: StateCallback<T>) => State<T>;
+export const setComponents: (components: Record<string, Component>) => void;
+export const get: (alias: string) => any;
+export const set: (alias: string, artifact: Function | Object, persistence?: boolean) => void;
+export const dispatch: (alias: string, argument?: Object) => any;
+
+declare function lemonade(): any;
 
 declare namespace lemonade {
-    type OnloadFunction = (component: HTMLElement) => void;
-
-    type OnchangeFunction = (property: string, affectedElements: object) => void;
+    // Export core types
+    export { OnloadFunction, OnchangeFunction, State, StateCallback, Component };
 
     interface WebComponentOptions {
         /** Create the webcomponent inside a shadowRoot */
@@ -19,62 +73,29 @@ declare namespace lemonade {
         prefix?: string,
     }
 
-    interface ComponentEvents {
-        /**
-         * When the component is ready and appended to the DOM
-         */
-        onload?: OnloadFunction;
-        /**
-         * When a property used in the template is changed. Properties are tracked only when used in the template.
-         */
-        onchange?: OnchangeFunction;
-    }
-
-    type FunctionComponent = (this: {
-        el: HTMLElement;
-        refresh: (target?: string) => void;
-        [key: string]: any;
-    }) =>
-        | string
-        | ((render: {
-        (template: TemplateStringsArray, ...values: any[]): HTMLElement;
-        (template: string): HTMLElement;
-    }) => HTMLElement);
-
-    // Define the callback function type
-    type StateCallback<T> = (newValue: T, oldValue: T) => void;
-
-    class component {
-        constructor(s?: Record<string, any>);
-        // Root DOM element
-        el: HTMLElement;
-        // Refresh an array or the entire component
-        refresh: (target?: string) => void
-        [key: string]: any;
-    }
-
-    // State function with overloads to handle both cases
-    function state<T>(initialValue: T): [T, (value: T) => void];
-    function state<T>(initialValue: T, callback: StateCallback<T>): [T, (value: T) => void];
-
     /**
-     * Create a LemonadeJS - Depraceted
+     * Create a LemonadeJS
      * @param {string} template to create the element
      * @param {Object} self object to control the component
      * @param {Object} components that would be used in the template
      * @return {HTMLElement} Result DOM element, ready to be append to the DOM
      */
-    function element(template: String, self: Object, components?: Object) : HTMLElement;
+    export function element(template: string, self: Object, components?: Object): HTMLElement;
 
     /**
      * Append a LemonadeJS rendered DOM element to the DOM.
-     * @param {Function} component LemonadeJS component
+     * @param {LemonadeComponent} component LemonadeJS component
      * @param {HTMLElement} root DOM element container
      * @param {Object} self inject a self object to the renderer
      * @param {string?} template template to be passed to component
      * @return {HTMLElement} Result DOM element, ready to be append to the DOM
      */
-    function render(component: Function, root: HTMLElement, self?: Object) : Element;
+    export function render(
+        component: Component,
+        root: HTMLElement,
+        self?: Object,
+        template?: string
+    ): false | Element | Document | DocumentFragment;
 
     /**
      * Bind a self to an existing appended DOM element
@@ -82,14 +103,14 @@ declare namespace lemonade {
      * @param {Object} self LemonadeJS self controller
      * @param {Object} components that would be used in the template
      */
-    function apply(root: HTMLElement, self: Object, components?: Object) : void;
+    export function apply(root: HTMLElement, self: Object, components?: Object): void;
 
     /**
      * Extract a property from a nested object using a string address
      * @param {string} str address inside the nested object
      * @param {boolean} config get the configuration obj => property
      */
-    function path(str: string, config: boolean) : any;
+    export function path(str: string, config: boolean): any;
 
     /**
      * Extract a property from a nested object using a string address
@@ -97,14 +118,14 @@ declare namespace lemonade {
      * @param {function} handler LemonadeJS component
      * @param {object?} options Options for your webcomponent
      */
-    function createWebComponent(name: string, handler: Function, options?: WebComponentOptions) : any;
+    export function createWebComponent(name: string, handler: Component, options?: WebComponentOptions): any;
 
     /**
      * Get an artifact from LemonadeJS Sugar by its alias identification
      * @param {string} alias Existing sugar alias
      * @return {Object|Function} Sugar Artifact
      */
-    function get(alias: String) : void;
+    export function get(alias: string): void;
 
     /**
      * Set a artifact to LemonadeJS Sugar
@@ -112,20 +133,40 @@ declare namespace lemonade {
      * @param {Object|Function} artifact Object of function to be saved to sugar
      * @param {Boolean} persistence Persist the last call. Only valid when the artifact is a function.
      */
-    function set(alias: String, artifact: Function|Object, persistence?: Boolean) : void;
+    export function set(alias: string, artifact: Function | Object, persistence?: boolean): void;
 
     /**
      * Send an object to a sugar function.
      * @param {string} alias Existing sugar saved on sugar
-     * @param {object} argument Object as an argument for the method.
+     * @param {object?} argument Object as an argument for the method.
      */
-    function dispatch(alias: String, argument: Object) : void;
+    export function dispatch(alias: string, argument?: Object): void;
 
     /**
      * Add a custom component available across the whole application
      * @param {object} components
      */
-    function setComponents(components: Object) : void;
+    export function setComponents(components: Record<string, Component>): void;
+
+    /**
+     * Register a callback to be executed when component is loaded
+     * @param callback Function to be called with root element when component loads
+     */
+    export function onload(callback: OnloadFunction<HTMLElement>): void;
+
+    /**
+     * Onchange event
+     * @param prop Property name that changed
+     * @param elements Elements affected by the change
+     */
+    export function onchange<T extends HTMLElement>(prop: string, elements: T[]): void;
+
+    /**
+     * Create a reactive state container
+     * @param value Initial value
+     * @param callback Optional callback function when value changes
+     */
+    export function state<T>(value: T, callback?: StateCallback<T>): State<T>;
 }
 
 export default lemonade;
