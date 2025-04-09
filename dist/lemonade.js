@@ -9,10 +9,12 @@
  * Accept interpolated values on properties `<div test="test: ${state}"></div>
  */
 
+import {createWebComponent} from "lemonadejs";
+
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        typeof define === 'function' && define.amd ? define(factory) :
-            global.lemonade = factory();
+    typeof define === 'function' && define.amd ? define(factory) :
+    global.lemonade = factory();
 }(this, (function () {
 
     'use strict';
@@ -327,6 +329,28 @@
             }
         }
 
+        const commitComments = function() {
+            if (typeof(this.comments) !== 'undefined') {
+                let comments = this.comments;
+                if (comments) {
+                    comments = comments
+                        .replace('<!--', '')
+                        .replace('-->', '')
+
+                    if (! this.current.children) {
+                        this.current.children = [];
+                    }
+
+                    this.current.children.push({
+                        type: '#comments',
+                        parent: this.current,
+                        props: [{ name: 'text', value: comments }],
+                    });
+                }
+                delete this.comments;
+            }
+        }
+
         /**
          * Save the attribute to the tag
          */
@@ -614,7 +638,19 @@
                     commitText.call(this);
                 }
             }
-        };
+        }
+
+        actions.comments = function(char) {
+            if (! this.comments) {
+                this.comments = '';
+            }
+            this.comments += char;
+
+            if (this.comments.endsWith('-->')) {
+                commitComments.call(this);
+                this.action = 'text';
+            }
+        }
 
         // Control the LemonadeJS native references
         let referenceControl = null;
@@ -635,46 +671,53 @@
         for (let i = 0; i < html.length; i++) {
             // Current char
             let char = html[i];
-            let escaped = false;
 
-            if (values !== null) {
-                // Handle scape
-                if (char === '\\') {
-                    // This is a escaped char
-                    escaped = true;
-                    // Parse escape char
-                    char = escape(html[i+1]);
-                    // Move to the next char
-                    i++;
-                }
+            if (control.action === 'text' && char === '<' && html[i+1] === '!' && html[i+2] === '-' && html[i+3] === '-') {
+                control.action = 'comments';
             }
 
-            // Global control logic
-            if (control.tag) {
-                if (char === '>' || char === '/') {
-                    // End of tag, commit any attributes and go back to text parsing
-                    if (! control.tag.insideQuote) {
-                        control.action = 'closeTag';
+            if (control.action !== 'comments') {
+                let escaped = false;
+
+                if (values !== null) {
+                    // Handle scape
+                    if (char === '\\') {
+                        // This is a escaped char
+                        escaped = true;
+                        // Parse escape char
+                        char = escape(html[i+1]);
+                        // Move to the next char
+                        i++;
                     }
                 }
-            } else {
-                if (char === '<') {
-                    control.action = 'processTag';
+
+                // Global control logic
+                if (control.tag) {
+                    if (char === '>' || char === '/') {
+                        // End of tag, commit any attributes and go back to text parsing
+                        if (!control.tag.insideQuote) {
+                            control.action = 'closeTag';
+                        }
+                    }
+                } else {
+                    if (char === '<') {
+                        control.action = 'processTag';
+                    }
                 }
-            }
 
-            // Register references for a dynamic template
-            if (! escaped && char === '$' && html[i+1] === '{') {
-                const result = extractExpressionContent(html, i + 2);
-                control.reference = result.content;
-                i = result.position;
-            }
+                // Register references for a dynamic template
+                if (!escaped && char === '$' && html[i + 1] === '{') {
+                    const result = extractExpressionContent(html, i + 2);
+                    control.reference = result.content;
+                    i = result.position;
+                }
 
-            // Control node references
-            if (char === '{' && html[i+1] === '{') {
-                referenceControl = 1;
-            } else if (char === '}' && html[i-1] === '}') {
-                referenceControl = 2;
+                // Control node references
+                if (char === '{' && html[i + 1] === '{') {
+                    referenceControl = 1;
+                } else if (char === '}' && html[i - 1] === '}') {
+                    referenceControl = 2;
+                }
             }
 
             // Execute action
@@ -1028,7 +1071,7 @@
                     lemon.ready.push(event);
                 }
             }
-        }
+       }
 
         const isLoopAttribute = function(props) {
             let test = false;
@@ -1051,7 +1094,7 @@
                                 container.appendChild(child.element.firstChild);
                             }
                         } else {
-                            container.appendChild(child.element);
+                          container.appendChild(child.element);
                         }
                     }
                 });
@@ -1127,7 +1170,9 @@
         const createElements = function(item) {
             if (typeof(item) === 'object') {
                 // Create element
-                if (item.type === '#text') {
+                if (item.type === '#comments') {
+                    item.element = document.createComment(item.props[0].value);
+                } else if (item.type === '#text') {
                     // Text node
                     item.element = document.createTextNode('');
                     // Check for dynamic content
@@ -1955,6 +2000,10 @@
      * @param {object} options - options to create the web components
      */
     L.createWebComponent = function(name, handler, options) {
+        if (typeof(window) === 'undefined') {
+            return;
+        }
+
         if (typeof(handler) !== 'function') {
             return 'Handler should be an function';
         }
