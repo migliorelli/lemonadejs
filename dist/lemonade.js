@@ -8,9 +8,6 @@
  * @Roadmap
  * Accept interpolated values on properties `<div test="test: ${state}"></div>
  */
-
-import {createWebComponent} from "lemonadejs";
-
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
@@ -1094,7 +1091,7 @@ import {createWebComponent} from "lemonadejs";
                                 container.appendChild(child.element.firstChild);
                             }
                         } else {
-                          container.appendChild(child.element);
+                            container.appendChild(child.element);
                         }
                     }
                 });
