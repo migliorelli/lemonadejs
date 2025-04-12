@@ -3,28 +3,24 @@ describe('Refresh', () => {
     it('Testing node position after full refresh', function() {
         function Test() {
             let self = this;
-            let template = `<div>{{self.value}}</div>`;
-
-            return lemonade.element(template, self);
-        }
-
-        // Get the attributes from the tag
-        function Component() {
-            let self = this;
-            let template = `<>
-                <p></p>
-                <Test value="1"/>
-                <p></p>
-                <Test value="2" @ref="self.reference"/>
-                <p></p>
-                <Test value="3"/>
-            </>`;
-
-            return lemonade.element(template, self, {Test});
+            return `<div>{{self.value}}</div>`;
         }
 
         // Register as a global component.
         lemonade.setComponents({Test});
+
+        // Get the attributes from the tag
+        function Component() {
+            let self = this;
+            return `<>
+                <p></p>
+                <Test value="1"/>
+                <p></p>
+                <Test value="2" :ref="self.reference"/>
+                <p></p>
+                <Test value="3"/>
+            </>`;
+        }
 
         // Render the component and assert the return
         return render(Component).assert('2', function () {
@@ -53,7 +49,7 @@ describe('Refresh', () => {
                 {title: 'Duckduckgo', description: 'Privacy in the first place...', status: 1},
             ];
 
-            return `<><Test @loop="self.rows" /></>`;
+            return `<><Test :loop="self.rows" /></>`;
         }
 
 
@@ -66,35 +62,6 @@ describe('Refresh', () => {
             self.rows[1].status = 0;
             self.rows[1].refresh();
             return self.rows[1].el.parentNode.children[1].tagName;
-        })
-    });
-
-    it('Update the property of a self when using reference', function() {
-
-        function Test() {
-            let self = this;
-            self.onload = function() {
-                self.data *= 10;
-            }
-
-            return `<div>{{self.data}}</div>`;
-        }
-
-        function Component() {
-            let self = this;
-            self.number = 1;
-            return `<><Test :data="self.number" :ref="self.instance" /></>`;
-        }
-
-
-        // Register as a global component.
-        lemonade.setComponents({Test});
-
-        // Render the component and assert the return
-        return render(Component).assert('10', function () {
-            let self = this;
-
-            return self.instance.el.textContent;
         })
     });
 });

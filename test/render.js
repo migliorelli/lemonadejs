@@ -10,7 +10,7 @@ describe('Render', () => {
         function Component() {
             let self = this;
             self.test = 120;
-            return `<Test value="{{self.test}}" @ref="self.component" />`;
+            return `<Test value="{{self.test}}" :ref="self.component" />`;
         }
 
         // Register components
@@ -38,7 +38,7 @@ describe('Render', () => {
             return `<>
             <div>break 1</div>
             <Test value="1" />
-            <div @ref="self.test">break 2</div>
+            <div :ref="self.test">break 2</div>
             <Test value="2" />
         </>`;
         }

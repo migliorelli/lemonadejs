@@ -1,7 +1,7 @@
 describe('General', () => {
 
     it('Reference for a custom component as a class', function() {
-        class Hello extends lemonade.component {
+        class Test extends lemonade.component {
             constructor(o) {
                 super(o);
             }
@@ -13,17 +13,17 @@ describe('General', () => {
             }
         }
 
+        lemonade.setComponents({Test})
+
         // Get the attributes from the tag
         function Component() {
             let self = this;
             self.value = 1000;
 
             // Title and year are declared in the parent template
-            let template = `<div>
-                <Hello value="{{self.value}}" @ref="self.component"/>
+            return `<div>
+                <Hello value="{{self.value}}" :ref="self.component"/>
             </div>`;
-
-            return lemonade.element(template, self, {Hello});
         }
 
         // Render the component and assert the return
@@ -52,7 +52,6 @@ describe('General', () => {
             return self.el.getAttribute('test');
         })
     });
-
 
     it('Integrating LemonadeJS with web-components', function() {
         class HelloElement extends HTMLElement {
@@ -90,7 +89,7 @@ describe('General', () => {
             let self = this;
             self.test = 120;
             return `<>
-                <hello-element value="{{self.test}}" @ref="self.element"></hello-element>
+                <hello-element value="{{self.test}}" :ref="self.element"></hello-element>
             </>`;
         }
 
@@ -98,6 +97,26 @@ describe('General', () => {
         return render(Component).assert('120', function () {
             let self = this;
             return self.element.firstChild.firstChild.textContent;
+        })
+    });
+
+    it('Ready as a function', function() {
+        // Get the attributes from the tag
+        function Component() {
+            const ready = (a) => {
+                a.textContent = 'test';
+            }
+
+            // Title and year are declared in the parent template
+            return render => render`<div>
+                <h1 :ready="${ready}">h1</h1>
+            </div>`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('test', function () {
+            let self = this;
+            return self.el.textContent;
         })
     });
 });

@@ -1,27 +1,27 @@
 describe('Loop', () => {
 
     it('Update the first element inside a loop', function() {
-        // Get the attributes from the tag
-        function Component() {
-            let self = this;
+        /**
+         * Component
+         */
+        const Component = function() {
+            let [ form, setForm ] = lemonade.setPath(null);
 
-            self.data = [
-                {title: 'lemonadejs'},
-                {title: 'angular'}
-            ];
+            setForm({
+                options: {
+                    mask: 123,
+                },
+            })
 
-            return `<>
-            <ul :loop="self.data" :ref="self.root">
-                <li>{{self.title}}</li>
-            </ul>
-        </ul>`;
+            return render => render`<div>
+                <input type='text' lm-path="options.mask" :ref="self.test"/>
+            </div>`;
         }
 
         // Render the component and assert the return
-        return render(Component).assert('New title', function () {
+        return render(Component).assert('123', function () {
             let self = this;
-            self.data[0].title = 'New title';
-            return self.root.children[0].textContent;
+            return self.test.value;
         })
     });
 

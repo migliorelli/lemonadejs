@@ -3,14 +3,19 @@ describe('Properties', () => {
     it('Tracking sub-level object properties', function() {
         // Lemonade Component
         function Component() {
-            let self = this;
-            self.test = {
+            this.test = {
                 value: 123,
             }
+            const update = () => {
+                this.test.value++;
+                // Will force the refresh to all the nodes tha has references for test
+                this.refresh('test');
+            }
+
             // Title and year are declared in the parent template
             return (render) => render`<div>
-                <h1 :ref="self.title">{{self.test.value}}</h1>
-                <input type="button" onclick="${()=>self.test.value++}" :ref="self.button" />
+                <h1>${this.test.value}</h1>
+                <input type="button" onclick="${update}" :ref="${this.button}" />
             </div>`;
         }
 
@@ -20,7 +25,7 @@ describe('Properties', () => {
             // Simulate the click in the button
             self.button.click();
             // Return the value
-            return self.title.textContent;
+            return self.el.textContent;
         })
     });
 
@@ -65,8 +70,8 @@ describe('Properties', () => {
             let self = this;
             self.value = 100;
             return `<>
-                <ClassComponent value="{{self.value}}" @ref="self.class" />
-                <FunctionComponent value="{{self.value}}" @ref="self.function" />
+                <ClassComponent value="{{self.value}}" :ref="self.class" />
+                <FunctionComponent value="{{self.value}}" :ref="self.function" />
             </>`;
         }
 
@@ -162,11 +167,26 @@ describe('Properties', () => {
             }
 
             // This is not inline scripting and can be used with CSP.
-            return `<input type="text" test="{{self.value}} * 2 = {{self.total}}" value="{{self.total}}" />`;
+            return `<input type="text" test="{{self.value}} * 2 = {{self.total}}" value="{{self.total()}}" />`;
         }
 
         // Render the component and assert the return
         return render(Component).assert('10.44', function () {
+            let self = this;
+            // Return the value
+            return self.el.value;
+        })
+    });
+
+    it('Composition Input', function() {
+        function Component() {
+            this.total = 20;
+            // This is not inline scripting and can be used with CSP.
+            return render => render`<input type="text" value="total ${this.total*2}" />`;
+        }
+
+        // Render the component and assert the return
+        return render(Component).assert('total 40', function () {
             let self = this;
             // Return the value
             return self.el.value;
