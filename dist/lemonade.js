@@ -8,6 +8,7 @@
  * @Roadmap
  * Accept interpolated values on properties `<div test="test: ${state}"></div>
  */
+
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
@@ -43,6 +44,54 @@
 
     // Script expression inside LemonadeJS templates
     let isScript = /{{(.*?)}}/g;
+
+    /**
+     * Apply value in a object based on the address
+     */
+    const Path = function(str, val, remove) {
+        str = str.split('.');
+        if (str.length) {
+            let o = this;
+            let p = null;
+            while (str.length > 1) {
+                // Get the property
+                p = str.shift();
+                // Check if the property exists
+                if (o.hasOwnProperty(p)) {
+                    o = o[p];
+                } else {
+                    // Property does not exist
+                    if (typeof(val) === 'undefined') {
+                        return undefined;
+                    } else {
+                        // Create the property
+                        o[p] = {};
+                        // Next property
+                        o = o[p];
+                    }
+                }
+            }
+            // Get the property
+            p = str.shift();
+            // Set or get the value
+            if (typeof(val) !== 'undefined') {
+                if (remove === true) {
+                    delete o[p];
+                } else {
+                    o[p] = val;
+                }
+                // Success
+                return true;
+            } else {
+                // Return the value
+                if (o) {
+                    return o[p];
+                }
+            }
+        }
+        // Something went wrong
+        return false;
+    }
 
     /**
      * Show a better error developers
@@ -1080,6 +1129,37 @@
             return test;
         }
 
+        const registerPath = function(item, prop) {
+            if (! lemon.path.elements) {
+                lemon.path.elements = [];
+            }
+
+            let element = getElement(item);
+
+            lemon.path.elements.push({
+                element: element,
+                path: prop.value
+            });
+
+            // Event from component to the property
+            let event = function () {
+                // Get the current value of my HTML form element or component
+                let value = getAttribute(element, 'value');
+                // Apply the new value on the path on the object
+                Path.call(lemon.path.value, prop.value, value);
+                // Call the callback when exist
+                if (typeof(lemon.path.change) === 'function') {
+                    lemon.path.change(value, prop.value, element);
+                }
+            }
+
+            if (typeof(item.type) === 'function') {
+                // TODO: components
+            } else {
+                item.element.addEventListener('input', event);
+            }
+        }
+
         const appendChildren = function(container, children) {
             if (container && children) {
                 children.forEach(child => {
@@ -1091,7 +1171,7 @@
                                 container.appendChild(child.element.firstChild);
                             }
                         } else {
-                            container.appendChild(child.element);
+                          container.appendChild(child.element);
                         }
                     }
                 });
@@ -1222,14 +1302,13 @@
 
                     // Create all children
                     if (! item.loop) {
-                        if (item.children) {
+                        if (item.children && Array.isArray(item.children)) {
                             item.children.forEach(child => {
                                 createElements(child);
                             });
-
-                            if (item.element) {
-                                appendChildren(item.element, item.children);
-                            }
+                        }
+                        if (item.element) {
+                            appendChildren(item.element, item.children);
                         }
                     }
 
@@ -1296,6 +1375,8 @@
                                     registerLoop(item, prop);
                                 } else if (attrName === 'bind') {
                                     applyBindHandler(item, prop);
+                                } else if (attrName === 'path') {
+                                    registerPath(item, prop);
                                 } else {
                                     setDynamicValue(item, prop, attrName);
                                 }
@@ -1669,6 +1750,7 @@
             components: {},
             elements: [],
             root: root,
+            path: {},
         }
 
         if (! item) {
@@ -1822,6 +1904,17 @@
             }
             // Push the event
             lemon.events[token].push(item.bind);
+        }
+
+        // In case initial exists
+        if (typeof(lemon.path.initial) === 'object') {
+            // Get the value of the draft
+            let newValue = lemon.path.initial;
+            // Delete draft
+            delete lemon.path.initial;
+            // Apply new values
+            lemon.path.setValue(newValue);
+
         }
 
         // Apply events
@@ -2004,7 +2097,6 @@
         if (typeof(handler) !== 'function') {
             return 'Handler should be an function';
         }
-
         // Prefix
         let prefix = options && options.prefix ? options.prefix : 'lm';
 
@@ -2162,6 +2254,44 @@
         });
 
         return s;
+    }
+
+    L.setPath = function(initialValues, change) {
+        if (! currentLemon) {
+            createError(wrongLevel);
+        }
+
+        // Lemon
+        const lemon = currentLemon;
+        // My value object
+        let value = {};
+        // Create method to update the state
+        const setValue = (newValue) => {
+            if (typeof(lemon.path.initial) === 'undefined') {
+                if (typeof (newValue) === 'object') {
+                    // If my has been declared
+                    let elements = lemon.path.elements;
+                    if (elements) {
+                        for (let i = 0; i < elements.length; i++) {
+                            let value = Path.call(newValue, elements[i].path)
+
+                            setAttribute(elements[i].element, 'value', value);
+                        }
+                    }
+                }
+            } else {
+                lemon.path.initial = newValue;
+            }
+        }
+
+        lemon.path = {
+            setValue: setValue,
+            value: value,
+            change: change,
+            initial: initialValues || {}
+        };
+
+        return [value, setValue];
     }
 
     L.helpers = {
