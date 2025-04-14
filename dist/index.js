@@ -1115,7 +1115,7 @@ function Lemonade() {
         const isLoopAttribute = function(props) {
             let test = false;
             props.forEach(function(prop) {
-                if (prop.name === ':loop' || prop.name === 'lm-loop') {
+                if (prop.name === ':loop' || prop.name === 'lm-loop' || prop.name === '@loop') {
                     test = true;
                 }
             });
@@ -1172,7 +1172,7 @@ function Lemonade() {
         }
 
         const getAttributeName = function(prop) {
-            return prop[0] === ':' ? prop.substring(1) : prop.substring(3);
+            return prop[0] === ':' || prop[0] === '@' ? prop.substring(1) : prop.substring(3);
         }
 
         const getAttributeEvent = function(event) {
@@ -1356,7 +1356,7 @@ function Lemonade() {
                                         item.self[event] = handler || value;
                                     }
                                 }
-                            } else if (prop.name.startsWith(':') || prop.name.startsWith('lm-')) {
+                            } else if (prop.name.startsWith(':') || prop.name.startsWith('@') || prop.name.startsWith('lm-')) {
                                 // Special lemonade attribute name
                                 let attrName = getAttributeName(prop.name);
                                 // Special properties bound to the self
@@ -2143,7 +2143,9 @@ function Lemonade() {
                 }
             }
 
-            window.customElements.define(componentName, Component);
+            if (! window.customElements.get(componentName)) {
+                window.customElements.define(componentName, Component);
+            }
         }
     }
 
