@@ -1801,7 +1801,7 @@ function Lemonade() {
 
         // Virtual DOM tree
         if (typeof(result) === 'string') {
-            result = HTMLParser(result, values);
+            result = HTMLParser(result.trim(), values);
         }
 
         let element;
