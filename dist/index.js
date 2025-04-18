@@ -1155,7 +1155,8 @@ function Lemonade() {
 
         const appendChildren = function(container, children) {
             if (container && children) {
-                children.forEach(child => {
+                for (let i = 0; i < children.length; i++) {
+                    let child = children[i];
                     if (typeof(child) === 'string') {
                         container.appendChild(document.createTextNode(child));
                     } else if (child.element) {
@@ -1167,7 +1168,7 @@ function Lemonade() {
                             container.appendChild(child.element);
                         }
                     }
-                });
+                }
             }
         }
 
