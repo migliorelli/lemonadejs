@@ -1154,7 +1154,7 @@
             }
 
             if (typeof(item.type) === 'function') {
-                // TODO: components
+                item.bind = event;
             } else {
                 item.element.addEventListener('input', event);
             }

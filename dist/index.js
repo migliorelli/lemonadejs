@@ -1,5 +1,5 @@
 /**
- * LemonadeJS v5.0.0 (ESM build)
+ * LemonadeJS v5.0.4 (ESM build)
  *
  * Website: https://lemonadejs.com
  * Description: Create amazing web based reusable components.
@@ -1147,7 +1147,7 @@ function Lemonade() {
             }
 
             if (typeof(item.type) === 'function') {
-                // TODO: components
+                item.bind = event;
             } else {
                 item.element.addEventListener('input', event);
             }
