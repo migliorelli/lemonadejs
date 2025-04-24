@@ -941,7 +941,6 @@
             }
         }
 
-
         /**
          * Create a LemonadeJS self bind
          * @param item
@@ -974,6 +973,78 @@
                 }
                 // Append event
                 appendEvent(prop, event, true);
+            }
+        }
+
+        /**
+         * Create a LemonadeJS self render
+         * @param item
+         * @param prop
+         */
+        const applyRenderHandler = function(item, prop) {
+            // Create a reference to the DOM element
+            let property = prop.expression || prop.value;
+            let getValue = null;
+            let token = null;
+
+            if (isReferenceToken(property, true)) {
+                token = property.split('.')[1];
+                // Get value
+                getValue = () => {
+                    return lemon.self[token];
+                }
+            } else {
+                if (typeof(prop.expression) !== 'undefined') {
+                    getValue = () => {
+                        // Extra the value from the template
+                        let data = lemon.view(parseTemplate)[prop.index];
+                        if (data instanceof state) {
+                            data = data.value;
+                        }
+                        return data;
+                    }
+                }
+            }
+
+            if (getValue) {
+                // Create container to keep the elements
+                item.container = [];
+
+                // Event property to the element
+                let event = () => {
+                    // Root element
+                    let root = typeof(item.type) === 'function' ? item.self.el : item.element;
+                    // Curren value
+                    let value = getValue();
+                    if (value) {
+                        item.container.forEach(e => {
+                            root.appendChild(e);
+                        });
+                    } else {
+                        while (root.firstChild) {
+                            item.container.push(root.firstChild);
+                            root.firstChild.remove();
+                        }
+                    }
+                }
+
+                if (token) {
+                    // Append event
+                    appendEvent(token, event);
+                } else {
+                    if (typeof(prop.expression) !== 'undefined') {
+                        lemon.events[prop.index] = event;
+                        createEventsFromExpression(prop.expression, event);
+                    }
+                }
+
+                // Execute event
+                let root = typeof(item.type) === 'function' ? item.self.el : item.element;
+                if (root) {
+                    event();
+                } else {
+                    lemon.ready.push(event);
+                }
             }
         }
 
@@ -1378,6 +1449,8 @@
                                     applyBindHandler(item, prop);
                                 } else if (attrName === 'path') {
                                     registerPath(item, prop);
+                                } else if (attrName === 'render') {
+                                    applyRenderHandler(item, prop);
                                 } else {
                                     setDynamicValue(item, prop, attrName);
                                 }
