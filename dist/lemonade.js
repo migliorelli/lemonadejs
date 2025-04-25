@@ -1217,15 +1217,19 @@
                 // Get the current value of my HTML form element or component
                 let value = getAttribute(element, 'value');
                 // Apply the new value on the path on the object
-                Path.call(lemon.path.value, prop.value, value);
-                // Call the callback when exist
-                if (typeof(lemon.path.change) === 'function') {
-                    lemon.path.change(value, prop.value, element);
+                if (lemon.path.value) {
+                    Path.call(lemon.path.value, prop.value, value);
+                    // Call the callback when exist
+                    if (typeof(lemon.path.change) === 'function') {
+                        lemon.path.change(value, prop.value, element);
+                    }
+                } else {
+                    console.log('Use setPath to define the form container before using lm-path');
                 }
             }
 
             if (typeof(item.type) === 'function') {
-                item.bind = event;
+                item.path = event;
             } else {
                 item.element.addEventListener('input', event);
             }
@@ -1971,13 +1975,18 @@
         }
 
         // Bind to custom component
-        if (item.bind) {
+        if (item.bind || item.path) {
             let token = 'value';
             if (! lemon.events[token]) {
                 lemon.events[token] = []
             }
             // Push the event
-            lemon.events[token].push(item.bind);
+            if (item.bind) {
+                lemon.events[token].push(item.bind);
+            }
+            if (item.path) {
+                lemon.events[token].push(item.path);
+            }
         }
 
         // In case initial exists
