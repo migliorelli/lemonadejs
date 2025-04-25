@@ -156,6 +156,17 @@ export const dispatch: (alias: string, argument?: Object) => any;
  */
 export const createWebComponent: (name: string, handler: Component, options?: WebComponentOptions) => any;
 
+/**
+ * Create a reactive state with a path setter function
+ * @param {Object} initialData Initial object data
+ * @param {Function} callback Optional callback function when data changes
+ * @return {[Object, Function]} Returns a tuple with the state object and a setter function
+ */
+export const setPath: <T extends Record<string, any>>(
+    initialData: T, 
+    callback?: () => void
+  ) => [T, (updates: Partial<T>) => void];
+
 // Define the default export for better IDE integration
 declare const lemonade: {
     element: typeof element;
@@ -165,6 +176,7 @@ declare const lemonade: {
     onload: typeof onload;
     onchange: typeof onchange;
     state: typeof state;
+    setPath: typeof setPath;
     setComponents: typeof setComponents;
     get: typeof get;
     set: typeof set;
