@@ -1,6 +1,4 @@
 export default function Home() {
-    // This will bring all properties defined in the tag
-    let self = this;
-    // Custom HTML components has the self.value as default
-    return `<h1>{{self.value}}</h1>`;
+    // The properties passed to the tag call will be accessible through `this`
+    return `<h1>${this.text}</h1>`;
 }

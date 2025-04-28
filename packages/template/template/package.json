@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "lemonadejs": "^3.0.7"
+    "lemonadejs": "^5.0.6"
   },
   "scripts": {
     "tests": "npx @lemonadejs/tester",

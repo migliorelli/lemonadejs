@@ -1,4 +1,4 @@
-import lemonade from "lemonadejs";
+import { render } from "lemonadejs";
 import App from './App';
 
-lemonade.render(App, document.getElementById('root'));
+render(App, document.getElementById('root'));

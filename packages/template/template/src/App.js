@@ -1,13 +1,12 @@
-import lemonade from 'lemonadejs';
+import { setComponents } from 'lemonadejs';
 import Home from './Home.js';
 
 function App() {
-    let self = this;
-    self.test = "Hello world";
+    this.text = "Hello world";
 
-    return `<Home @bind="self.test" @ref="self.component"/>`;
+    return `<Home :text="${this.text}" />`;
 }
 
-lemonade.setComponents({ Home });
+setComponents({ Home });
 
 export default App;

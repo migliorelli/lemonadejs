@@ -11,8 +11,8 @@
         "lemonadejs utilities"
     ],
     "dependencies": {
-        "lemonadejs": "^3.0.7"
+        "lemonadejs": "^5.0.6"
     },
     "main": "dist/index.js",
-    "version": "1.0.1"
+    "version": "1.1.0"
 }
