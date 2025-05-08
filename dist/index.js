@@ -1132,6 +1132,10 @@ function Lemonade() {
                             // Render
                             L.render(method, root, self, item);
                         }
+
+                        if (root?.getAttribute('unique') === 'false') {
+                            delete self.el;
+                        }
                     })
                 }
             }
