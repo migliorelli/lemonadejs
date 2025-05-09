@@ -1613,7 +1613,7 @@ function Lemonade() {
                 value = e.val();
             } else {
                 if (e.getAttribute) {
-                    if (e.tagName === 'SELECT' && e.getAttribute('multiple')) {
+                    if (e.tagName === 'SELECT' && e.getAttribute('multiple') !== null) {
                         value = [];
                         for (let i = 0; i < e.options.length; i++) {
                             if (e.options[i].selected) {
