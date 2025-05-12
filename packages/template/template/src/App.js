@@ -1,12 +1,23 @@
-import { setComponents } from 'lemonadejs';
-import Home from './Home.js';
+import Message from './Message';
+import Profile from './Profile';
+import Home from './Home';
 
-function App() {
-    this.text = "Hello world";
+export default function App() {
 
-    return `<Home :text="${this.text}" />`;
+    const beforeChange = function() {
+        console.log(arguments)
+    }
+
+    return render => render`<>
+        <Router animation="${true}" onchangepage="${beforeChange}">
+            <Route path="/" controller="${Home}" />
+            <Route path="/compose" controller="${Message}" />
+            <Route path="/profile" controller="${Profile}" />
+        </Router>
+        <Toolbar>
+            <a data-icon="inbox" title="Inbox" href="/" />
+            <a data-icon="create" title="New message" href="/compose" />
+            <a data-icon="person" title="Profile" href="/profile" />
+        </Toolbar>
+    </>`;
 }
-
-setComponents({ Home });
-
-export default App;

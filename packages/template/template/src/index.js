@@ -1,4 +1,9 @@
-import { render } from "lemonadejs";
+import lemonade from "lemonadejs";
+import '@lemonadejs/router';
+import '@lemonadejs/toolbar';
 import App from './App';
 
-render(App, document.getElementById('root'));
+import '@lemonadejs/router/dist/style.css';
+import '@lemonadejs/toolbar/dist/style.css';
+
+lemonade.render(App, document.getElementById('root'));

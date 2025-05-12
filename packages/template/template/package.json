@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "lemonadejs": "^5.0.6"
+    "@lemonadejs/router": "^6.0.0",
+    "@lemonadejs/toolbar": "^5.0.6",
+    "lemonadejs": "^5.0.8"
   },
   "scripts": {
     "tests": "npx @lemonadejs/tester",

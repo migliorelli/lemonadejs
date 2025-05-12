@@ -1,4 +1,15 @@
 export default function Home() {
-    // The properties passed to the tag call will be accessible through `this`
-    return `<h1>${this.text}</h1>`;
+
+    this.onenter = function() {
+        console.log('Enter home');
+    }
+
+    this.onleave = function() {
+        console.log('Leave home');
+    }
+
+    return render => render`<div>
+        <h1>Home</h1>
+        <p>This is home...</p>
+    </div>`;
 }
