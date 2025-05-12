@@ -3,16 +3,18 @@
     "title": "LemonadeJS base template",
     "description": "LemonadeJS base template",
     "author": {
-        "name": "Contact <contact@lemonadejs.net>",
-        "url": "https://lemonadejs.net"
+        "name": "Contact <contact@jspreadsheet.com>",
+        "url": "https://lemonadejs.com"
     },
     "keywords": [
         "base template",
         "lemonadejs utilities"
     ],
     "dependencies": {
-        "lemonadejs": "^5.0.6"
+        "@lemonadejs/router": "^6.0.0",
+        "@lemonadejs/toolbar": "^5.0.6",
+        "lemonadejs": "^5.0.8"
     },
     "main": "dist/index.js",
-    "version": "5.0.0"
+    "version": "5.0.1"
 }
