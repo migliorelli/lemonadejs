@@ -2362,15 +2362,27 @@
                     let elements = lemon.path.elements;
                     if (elements) {
                         for (let i = 0; i < elements.length; i++) {
-                            let value = Path.call(newValue, elements[i].path)
-
-                            setAttribute(elements[i].element, 'value', value);
+                            let v = Path.call(newValue, elements[i].path)
+                            setAttribute(elements[i].element, 'value', v);
                         }
                     }
                 }
             } else {
                 lemon.path.initial = newValue;
             }
+        }
+
+        const getValue = () => {
+            let ret = {};
+            // If my has been declared
+            let elements = lemon.path.elements;
+            if (elements) {
+                for (let i = 0; i < elements.length; i++) {
+                    let v = getAttribute(elements[i].element, 'value');
+                    Path.call(ret, elements[i].path, v);
+                }
+            }
+            return ret;
         }
 
         lemon.path = {
@@ -2380,7 +2392,7 @@
             initial: initialValues || {}
         };
 
-        return [value, setValue];
+        return [value, setValue, getValue];
     }
 
     L.helpers = {

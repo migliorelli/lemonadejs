@@ -160,12 +160,12 @@ export const createWebComponent: (name: string, handler: Component, options?: We
  * Create a reactive state with a path setter function
  * @param {Object} initialData Initial object data
  * @param {Function} callback Optional callback function when data changes
- * @return {[Object, Function]} Returns a tuple with the state object and a setter function
+ * @return {[Object, Function, Function]} Returns a tuple with the state object, a setter function, a getter function with filtered data by visibility
  */
 export const setPath: <T extends Record<string, any>>(
     initialData: T, 
     callback?: () => void
-  ) => [T, (updates: Partial<T>) => void];
+  ) => [T, (updates: Partial<T>) => void, () => T];
 
 // Define the default export for better IDE integration
 declare const lemonade: {
